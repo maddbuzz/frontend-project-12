@@ -10,6 +10,7 @@ import {
 import { Button, Navbar } from 'react-bootstrap';
 
 import LoginPage from './LoginPage.jsx';
+import PrivatePage from './PrivatePage.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
 
 import AuthContext from '../contexts/index.jsx';
@@ -17,8 +18,8 @@ import useAuth from '../hooks/index.jsx';
 
 const AuthProvider = ({ children }) => {
   const [userId, setUserId] = useState(() => localStorage.getItem('userId'));
-  const userLogIn = (serverData) => {
-    const value = JSON.stringify(serverData);
+  const userLogIn = (userData) => {
+    const value = JSON.stringify(userData);
     localStorage.setItem('userId', value);
     setUserId(value);
   };
@@ -69,6 +70,7 @@ const App = () => (
             element={(
               <PrivateRoute>
                 <div>CHAT</div>
+                <PrivatePage />
               </PrivateRoute>
             )}
           />

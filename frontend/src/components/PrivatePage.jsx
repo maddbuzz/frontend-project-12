@@ -1,42 +1,30 @@
-const PrivatePage = () => (
-  <div>
-    Private Page
-  </div>
-);
-
-export default PrivatePage;
-
-/*
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
-import routes from '../routes.js';
+import paths from '../paths.js';
+import useAuth from '../hooks/index.jsx';
 
-const getAuthHeader = () => {
-  const userId = JSON.parse(localStorage.getItem('userId'));
-
-  if (userId && userId.token) {
-    return { Authorization: `Bearer ${userId.token}` };
+const getAuthHeader = (userId) => {
+  const userData = JSON.parse(userId);
+  if (userData && userData.token) {
+    return { Authorization: `Bearer ${userData.token}` };
   }
-
   return {};
 };
 
 const PrivatePage = () => {
-  // BEGIN
-  const [content, setContent] = useState('');
+  const auth = useAuth();
+  const [content, setContent] = useState({});
+
   useEffect(() => {
     const fetchContent = async () => {
-      const { data } = await axios.get(routes.usersPath(), { headers: getAuthHeader() });
+      const { data } = await axios.get(paths.dataPath(), { headers: getAuthHeader(auth.userId) });
       setContent(data);
     };
-
     fetchContent();
-  }, []);
+  }, [auth.userId]);
 
-  return content && <p>{content}</p>;
-  // END
+  return content && <p>{JSON.stringify(content)}</p>;
 };
 
 export default PrivatePage;
-*/
