@@ -1,8 +1,10 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { useFormik } from 'formik';
-import { Button, Form } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 
 import useAuth from '../hooks/index.jsx';
 import paths from '../paths.js';

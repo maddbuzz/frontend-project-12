@@ -7,7 +7,9 @@ import {
   Navigate,
   useLocation,
 } from 'react-router-dom';
-import { Button, Navbar } from 'react-bootstrap';
+
+import Button from 'react-bootstrap/Button';
+import Navbar from 'react-bootstrap/Navbar';
 
 import LoginPage from './LoginPage.jsx';
 import PrivatePage from './PrivatePage.jsx';
