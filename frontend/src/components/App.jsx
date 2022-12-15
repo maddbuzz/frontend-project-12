@@ -10,6 +10,7 @@ import {
 
 import Button from 'react-bootstrap/Button';
 import Navbar from 'react-bootstrap/Navbar';
+import Container from 'react-bootstrap/Container';
 
 import LoginPage from './LoginPage.jsx';
 import PrivatePage from './PrivatePage.jsx';
@@ -17,6 +18,7 @@ import NotFoundPage from './NotFoundPage.jsx';
 
 import AuthContext from '../contexts/index.jsx';
 import useAuth from '../hooks/index.jsx';
+import ChatPage from './ChatPage.jsx';
 
 const AuthProvider = ({ children }) => {
   const [userId, setUserId] = useState(() => localStorage.getItem('userId'));
@@ -47,39 +49,42 @@ const PrivateRoute = ({ children }) => {
 
 const AuthButton = () => {
   const auth = useAuth();
-  const location = useLocation();
+  // const location = useLocation();
   return (
     auth.userId
-      ? <Button onClick={auth.userLogOut}>Log out</Button>
-      : <Button as={Link} to="/login" state={{ from: location }}>Log in</Button>
+      ? <Button onClick={auth.userLogOut}>Выйти</Button>
+      : null
+      // : <Button as={Link} to="/login" state={{ from: location }}>Войти</Button>
   );
 };
 
 const App = () => (
   <AuthProvider>
     <Router>
+      <div className="d-flex flex-column vh-100">
 
-      <Navbar bg="light" expand="lg">
-        <Navbar.Brand as={Link} to="/">Root Place</Navbar.Brand>
-        <AuthButton />
-      </Navbar>
+        <Navbar className="shadow-sm navbar-expand-lg navbar-light bg-white">
+          <Container>
+            <Navbar.Brand as={Link} to="/">Hexlet Chat</Navbar.Brand>
+            <AuthButton />
+          </Container>
+        </Navbar>
 
-      <div className="container p-3">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
             path="/"
             element={(
               <PrivateRoute>
-                <div>CHAT</div>
+                <ChatPage />
                 <PrivatePage />
               </PrivateRoute>
             )}
           />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-      </div>
 
+      </div>
     </Router>
   </AuthProvider>
 );

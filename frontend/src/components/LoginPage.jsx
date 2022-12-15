@@ -5,6 +5,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 import useAuth from '../hooks/index.jsx';
 import paths from '../paths.js';
@@ -45,9 +48,9 @@ const LoginPage = () => {
   });
 
   return (
-    <div className="container-fluid">
-      <div className="row justify-content-center pt-5">
-        <div className="col-sm-4">
+    <Container fluid className="h-100">
+      <Row className="justify-content-center align-content-center h-100">
+        <Col sm={4}>
           <Form onSubmit={formik.handleSubmit} className="p-3">
             <fieldset disabled={formik.isSubmitting}>
               <Form.Group>
@@ -79,12 +82,12 @@ const LoginPage = () => {
                 />
                 <Form.Control.Feedback type="invalid">the username or password is incorrect</Form.Control.Feedback>
               </Form.Group>
-              <Button type="submit" variant="outline-primary">Submit</Button>
+              <Button type="submit" variant="outline-primary" className="mt-2">Submit</Button>
             </fieldset>
           </Form>
-        </div>
-      </div>
-    </div>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 
