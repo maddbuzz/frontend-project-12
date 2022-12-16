@@ -1,24 +1,21 @@
 import React, { useMemo, useState } from 'react';
 import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  Navigate,
-  useLocation,
+  BrowserRouter as Router, Link,
+  Navigate, Route, Routes, useLocation,
 } from 'react-router-dom';
 
 import Button from 'react-bootstrap/Button';
-import Navbar from 'react-bootstrap/Navbar';
 import Container from 'react-bootstrap/Container';
+import Navbar from 'react-bootstrap/Navbar';
 
+import ChatPage from './ChatPage.jsx';
 import LoginPage from './LoginPage.jsx';
-import PrivatePage from './PrivatePage.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
+import PrivatePage from './PrivatePage.jsx';
+import SignupPage from './SignupPage.jsx';
 
 import AuthContext from '../contexts/index.jsx';
 import useAuth from '../hooks/index.jsx';
-import ChatPage from './ChatPage.jsx';
 
 const AuthProvider = ({ children }) => {
   const [userId, setUserId] = useState(() => localStorage.getItem('userId'));
@@ -72,6 +69,7 @@ const App = () => (
 
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route
             path="/"
             element={(
