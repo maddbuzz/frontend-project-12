@@ -2,7 +2,7 @@
 
 # Chat
 
-Realtime React/Redux App - similar to Slack Chat (very simplified version) using AJAX, REST, Web Sockets, React Hooks + Redux Toolkit + Formik
+Chat is a very simplistic alternative to Slack chat - a real-time React/Redux application using AJAX, REST, websockets, React Hooks + Redux Toolkit + Formik
 
 [(deployed on render.com)](https://maddbuzz-chat-project.onrender.com/)
 
