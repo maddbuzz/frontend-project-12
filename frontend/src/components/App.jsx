@@ -11,24 +11,27 @@ import Navbar from 'react-bootstrap/Navbar';
 import ChatPage from './ChatPage.jsx';
 import LoginPage from './LoginPage.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
-import PrivatePage from './PrivatePage.jsx';
+// import PrivatePage from './PrivatePage.jsx';
 import SignupPage from './SignupPage.jsx';
 
 import AuthContext from '../contexts/index.jsx';
 import useAuth from '../hooks/index.jsx';
 
 const AuthProvider = ({ children }) => {
-  const [userId, setUserId] = useState(() => localStorage.getItem('userId'));
-  const userLogIn = (userData) => {
-    const value = JSON.stringify(userData);
-    localStorage.setItem('userId', value);
-    setUserId(value);
+  const [userData, setUserData] = useState(() => {
+    const item = localStorage.getItem('userData');
+    return item ? JSON.parse(item) : null;
+  });
+  const userLogIn = (data) => {
+    setUserData(data);
+    const stringedData = JSON.stringify(data);
+    localStorage.setItem('userData', stringedData);
   };
   const userLogOut = () => {
-    localStorage.removeItem('userId');
-    setUserId(null);
+    setUserData(null);
+    localStorage.removeItem('userData');
   };
-  const auth = useMemo(() => ({ userId, userLogIn, userLogOut }), [userId]);
+  const auth = useMemo(() => ({ userData, userLogIn, userLogOut }), [userData]);
   return (
     <AuthContext.Provider value={auth}>
       {children}
@@ -40,7 +43,7 @@ const PrivateRoute = ({ children }) => {
   const auth = useAuth();
   const location = useLocation();
   return (
-    auth.userId ? children : <Navigate to="/login" state={{ from: location }} />
+    auth.userData ? children : <Navigate to="/login" state={{ from: location }} />
   );
 };
 
@@ -48,10 +51,9 @@ const AuthButton = () => {
   const auth = useAuth();
   // const location = useLocation();
   return (
-    auth.userId
+    auth.userData
       ? <Button onClick={auth.userLogOut}>Выйти</Button>
-      : null
-      // : <Button as={Link} to="/login" state={{ from: location }}>Войти</Button>
+      : null // : <Button as={Link} to="/login" state={{ from: location }}>Войти</Button>
   );
 };
 
@@ -75,7 +77,7 @@ const App = () => (
             element={(
               <PrivateRoute>
                 <ChatPage />
-                <PrivatePage />
+                {/* <PrivatePage /> */}
               </PrivateRoute>
             )}
           />
