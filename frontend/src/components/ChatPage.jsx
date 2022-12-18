@@ -12,7 +12,9 @@ import paths from '../paths.js';
 import { actions as channelsActions, selectors as channelsSelectors } from '../slices/channelsSlice.js';
 import { actions as messagesActions, selectors as messagesSelectors } from '../slices/messagesSlice.js';
 
-const LeftCol = ({ channels, selectedChannelId, setSelectedChannelId }) => (
+const socket = io();
+
+const LeftCol = ({ channels, currentChannelId, setCurrentChannelId }) => (
   <Col md={2} className="col-4 border-end pt-5 px-0 bg-light">
     <div className="d-flex justify-content-between mb-2 ps-4 pe-2">
       <span>Каналы</span>
@@ -28,8 +30,8 @@ const LeftCol = ({ channels, selectedChannelId, setSelectedChannelId }) => (
       {channels.map(({ name, id }) => (
         <li className="nav-item w-100" key={id}>
           <button
-            className={`w-100 rounded-0 text-start btn${id === selectedChannelId ? ' btn-secondary' : ''}`}
-            onClick={() => setSelectedChannelId(id)}
+            className={`w-100 rounded-0 text-start btn${id === currentChannelId ? ' btn-secondary' : ''}`}
+            onClick={() => setCurrentChannelId(id)}
             type="button"
           >
             <span className="me-1">#</span>
@@ -41,60 +43,78 @@ const LeftCol = ({ channels, selectedChannelId, setSelectedChannelId }) => (
   </Col>
 );
 
-const MessagesBox = ({ channelMessages }) => (
-  <div id="messages-box" className="chat-messages overflow-auto px-5 ">
-    {channelMessages.map(({ id, body, username }) => (
-      <div key={id} className="text-break mb-2">
-        <b>{username}</b>
-        {`: ${body}`}
-      </div>
-    ))}
-  </div>
-);
+const MessagesBox = ({ channelMessages }) => {
+  const messagesRef = useRef();
+  useEffect(() => {
+    const { current } = messagesRef;
+    const { scrollHeight, clientHeight } = current;
+    if (scrollHeight > clientHeight) current.scrollTop = scrollHeight - clientHeight;
+  }, [channelMessages.length]);
 
-const SendForm = ({
-  submitHandler, message, setMessage, inputRef,
-}) => (
-  <div className="mt-auto px-5 py-3">
-    <form noValidate="" className="py-1 border rounded-2" onSubmit={submitHandler}>
-      <div className="input-group has-validation">
-        <input
-          name="body"
-          aria-label="Новое сообщение"
-          placeholder="Введите сообщение..."
-          className="border-0 p-0 ps-2 form-control"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          ref={inputRef}
-        />
-        <button type="submit" disabled="" className="btn btn-group-vertical">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor" data-darkreader-inline-fill="" style={{ '--darkreader-inline-fill': 'currentColor;' }}>
-            <path fillRule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z" />
-          </svg>
-          <span className="visually-hidden">Отправить</span>
-        </button>
-      </div>
-    </form>
-  </div>
-);
+  return (
+    <div ref={messagesRef} id="messages-box" className="chat-messages overflow-auto px-5 ">
+      {channelMessages.map(({ id, body, username }) => (
+        <div key={id} className="text-break mb-2">
+          <b>{username}</b>
+          {`: ${body}`}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const SendingForm = ({ emitMessage }) => {
+  const inputRef = useRef();
+  useEffect(() => {
+    inputRef.current?.focus();
+  });
+
+  const [message, setMessage] = useState('');
+  const submitHandler = (e) => {
+    e.preventDefault();
+    emitMessage(message);
+    setMessage('');
+  };
+
+  return (
+    <div className="mt-auto px-5 py-3">
+      <form noValidate="" className="py-1 border rounded-2" onSubmit={submitHandler}>
+        <div className="input-group has-validation">
+          <input
+            name="body"
+            aria-label="Новое сообщение"
+            placeholder="Введите сообщение..."
+            className="border-0 p-0 ps-2 form-control"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            ref={inputRef}
+          />
+          <button type="submit" disabled="" className="btn btn-group-vertical">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor" data-darkreader-inline-fill="" style={{ '--darkreader-inline-fill': 'currentColor;' }}>
+              <path fillRule="evenodd" d="M15 2a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2zM0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm4.5 5.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z" />
+            </svg>
+            <span className="visually-hidden">Отправить</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
 
 const RightCol = ({
-  selectedChannel, channelMessages, submitHandler, message, setMessage, inputRef,
+  currentChannel, channelMessages, emitMessage,
 }) => (
   <Col className="p-0 h-100">
     <div className="d-flex flex-column h-100">
       <div className="bg-light mb-4 p-3 shadow-sm small">
-        <p className="m-0"><b>{`# ${selectedChannel?.name}`}</b></p>
+        <p className="m-0"><b>{`# ${currentChannel?.name}`}</b></p>
         <span className="text-muted">{`${channelMessages.length} сообщений`}</span>
       </div>
       <MessagesBox
         channelMessages={channelMessages}
       />
-      <SendForm
-        submitHandler={submitHandler}
-        message={message}
-        setMessage={setMessage}
-        inputRef={inputRef}
+      <SendingForm
+        emitMessage={emitMessage}
       />
     </div>
   </Col>
@@ -104,40 +124,28 @@ const getAuthHeader = (userData) => (
   userData?.token ? { Authorization: `Bearer ${userData.token}` } : {}
 );
 
-const socket = io();
-
 const ChatPage = () => {
-  const inputRef = useRef();
-
-  // const channels = useSelector(channelsSelectors.selectAll);
-  // const messages = useSelector(messagesSelectors.selectAll);
-  const [selectedChannelId, setSelectedChannelId] = useState(1);
-
-  const { channels, selectedChannel, channelMessages } = useSelector((state) => {
-    const allChannels = channelsSelectors.selectAll(state);
-    const currentChannel = channelsSelectors.selectById(state, selectedChannelId);
-    const messages = messagesSelectors.selectAll(state)
-      .filter(({ channelId }) => channelId === selectedChannelId);
-    return { channels: allChannels, selectedChannel: currentChannel, channelMessages: messages };
-  });
-
-  const [message, setMessage] = useState('');
+  const [currentChannelId, setCurrentChannelId] = useState(1);
+  const channels = useSelector(channelsSelectors.selectAll);
+  const currentChannel = useSelector(
+    (state) => channelsSelectors.selectById(state, currentChannelId),
+  );
+  const channelMessages = useSelector(messagesSelectors.selectAll)
+    .filter(({ channelId }) => channelId === currentChannelId);
 
   const auth = useAuth();
   const dispatch = useDispatch();
 
   socket.on('newMessage', (payload) => {
-    // console.log('newMessage arrived:', payload);
     dispatch(messagesActions.addMessage(payload));
+    // console.log('newMessage arrived:', payload);
   });
 
-  const submitHandler = (e) => {
-    e.preventDefault();
-    socket.emit('newMessage', {
-      body: message, channelId: selectedChannelId, username: auth.userData.username,
-    });
-    setMessage('');
-  };
+  const emitMessage = (message) => socket.emit(
+    'newMessage',
+    { body: message, channelId: currentChannelId, username: auth.userData.username },
+    // (response) => { console.log(response, response.status); },
+  );
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -149,27 +157,18 @@ const ChatPage = () => {
     fetchContent();
   }, [auth.userData, dispatch]);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, [selectedChannel]);
-
-  // if (!selectedChannel) return null;
-
   return (
     <Container className="h-100 my-4 overflow-hidden rounded shadow">
       <Row className="h-100 bg-white flex-md-row">
         <LeftCol
           channels={channels}
-          selectedChannelId={selectedChannelId}
-          setSelectedChannelId={setSelectedChannelId}
+          currentChannelId={currentChannelId}
+          setCurrentChannelId={setCurrentChannelId}
         />
         <RightCol
-          selectedChannel={selectedChannel}
+          currentChannel={currentChannel}
           channelMessages={channelMessages}
-          submitHandler={submitHandler}
-          message={message}
-          setMessage={setMessage}
-          inputRef={inputRef}
+          emitMessage={emitMessage}
         />
       </Row>
     </Container>

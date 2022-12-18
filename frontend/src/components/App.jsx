@@ -11,7 +11,6 @@ import Navbar from 'react-bootstrap/Navbar';
 import ChatPage from './ChatPage.jsx';
 import LoginPage from './LoginPage.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
-// import PrivatePage from './PrivatePage.jsx';
 import SignupPage from './SignupPage.jsx';
 
 import AuthContext from '../contexts/index.jsx';
@@ -77,7 +76,6 @@ const App = () => (
             element={(
               <PrivateRoute>
                 <ChatPage />
-                {/* <PrivatePage /> */}
               </PrivateRoute>
             )}
           />

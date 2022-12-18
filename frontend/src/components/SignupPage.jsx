@@ -48,14 +48,18 @@ const MyForm = (props) => {
     handleSubmit,
     isSubmitting,
     signupFailed,
-    inputRef,
   } = props;
+  const inputRef = useRef();
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
     <Form onSubmit={handleSubmit}>
       <h1 className="text-center mb-4">Регистрация</h1>
       <fieldset disabled={isSubmitting}>
         <Stack gap={2}>
-          <FloatingLabel label="Имя пользователя">
+          <FloatingLabel label="Имя пользователя" className="position-relative">
             <Form.Control
               onChange={handleChange}
               onBlur={handleBlur}
@@ -67,9 +71,16 @@ const MyForm = (props) => {
               isInvalid={signupFailed || (touched.username && errors.username)}
               ref={inputRef}
             />
-            <Form.Control.Feedback type="invalid" tooltip>
-              {(signupFailed && 'Такой пользователь уже существует') || errors.username}
-            </Form.Control.Feedback>
+            {signupFailed && (
+              <Form.Control.Feedback type="invalid" tooltip className="position-absolute top-0 start-100">
+                Такой пользователь уже существует
+              </Form.Control.Feedback>
+            )}
+            {errors.username && (
+              <Form.Control.Feedback type="invalid" tooltip>
+                {errors.username}
+              </Form.Control.Feedback>
+            )}
           </FloatingLabel>
           <FloatingLabel label="Пароль">
             <Form.Control
@@ -126,12 +137,8 @@ const validationSchema = Yup.object().shape({
 const SignupPage = () => {
   const auth = useAuth();
   const [signupFailed, setSignupFailed] = useState(false);
-  const inputRef = useRef();
   const location = useLocation();
   const navigate = useNavigate();
-  useEffect(() => {
-    inputRef.current?.focus();
-  });
 
   const MyEnhancedForm = withFormik({
     mapPropsToValues: () => ({
@@ -150,7 +157,6 @@ const SignupPage = () => {
       } catch (err) {
         if (err.isAxiosError) {
           setSignupFailed(true);
-          inputRef.current?.select();
           return;
         }
         throw err;
@@ -160,7 +166,7 @@ const SignupPage = () => {
 
   return (
     <FormContainer>
-      <MyEnhancedForm signupFailed={signupFailed} inputRef={inputRef} />
+      <MyEnhancedForm signupFailed={signupFailed} />
     </FormContainer>
   );
 };

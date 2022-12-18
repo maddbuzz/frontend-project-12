@@ -54,14 +54,18 @@ const MyForm = (props) => {
     handleSubmit,
     isSubmitting,
     authFailed,
-    inputRef,
   } = props;
+  const inputRef = useRef();
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
     <Form onSubmit={handleSubmit}>
       <h1 className="text-center mb-4">Войти</h1>
       <fieldset disabled={isSubmitting}>
         <Stack gap={4}>
-          <FloatingLabel label="Имя пользователя">
+          <FloatingLabel label="Имя пользователя" className="position-relative">
             <Form.Control
               onChange={handleChange}
               onBlur={handleBlur}
@@ -70,12 +74,19 @@ const MyForm = (props) => {
               name="username"
               id="username"
               autoComplete="username"
-              isInvalid={touched.username && errors.username}
+              isInvalid={authFailed || (touched.username && errors.username)}
               ref={inputRef}
             />
-            <Form.Control.Feedback type="invalid" tooltip>
-              {errors.username}
-            </Form.Control.Feedback>
+            {authFailed && (
+              <Form.Control.Feedback type="invalid" tooltip className="position-absolute top-0 start-100">
+                Неверные имя пользователя или пароль
+              </Form.Control.Feedback>
+            )}
+            {errors.username && (
+              <Form.Control.Feedback type="invalid" tooltip>
+                {errors.username}
+              </Form.Control.Feedback>
+            )}
           </FloatingLabel>
           <FloatingLabel label="Пароль">
             <Form.Control
@@ -87,10 +98,10 @@ const MyForm = (props) => {
               name="password"
               id="password"
               autoComplete="current-password"
-              isInvalid={authFailed}
+              isInvalid={touched.password && errors.password}
             />
             <Form.Control.Feedback type="invalid" tooltip>
-              Неверные имя пользователя или пароль
+              {errors.password}
             </Form.Control.Feedback>
           </FloatingLabel>
           <Button type="submit" variant="outline-primary">Войти</Button>
@@ -105,17 +116,15 @@ const validationSchema = Yup.object().shape({
     .min(3, 'От 3 до 20 символов')
     .max(20, 'От 3 до 20 символов')
     .required('Обязательное поле'),
+  password: Yup.string().trim()
+    .required('Обязательное поле'),
 });
 
 const LoginPage = () => {
   const auth = useAuth();
   const [authFailed, setAuthFailed] = useState(false);
-  const inputRef = useRef();
   const location = useLocation();
   const navigate = useNavigate();
-  useEffect(() => {
-    inputRef.current?.focus();
-  });
 
   const MyEnhancedForm = withFormik({
     mapPropsToValues: () => ({
@@ -134,7 +143,6 @@ const LoginPage = () => {
         //  setSubmitting(false); If async Formik will automatically set isSubmitting to false...
         if (err.isAxiosError) {
           setAuthFailed(true);
-          inputRef.current?.select();
           return;
         }
         throw err;
@@ -144,7 +152,7 @@ const LoginPage = () => {
 
   return (
     <FormContainer>
-      <MyEnhancedForm authFailed={authFailed} inputRef={inputRef} />
+      <MyEnhancedForm authFailed={authFailed} />
     </FormContainer>
   );
 };
