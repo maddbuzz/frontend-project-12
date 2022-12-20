@@ -1,53 +1,75 @@
 import { useFormik } from 'formik';
-import React, { useState, useEffect, useRef } from 'react';
+import _map from 'lodash/map.js';
+import React, { useEffect, useRef } from 'react';
+import * as Yup from 'yup';
 
-import FormControl from 'react-bootstrap/FormControl';
-import FormGroup from 'react-bootstrap/FormGroup';
+import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Form from 'react-bootstrap/Form';
+import Stack from 'react-bootstrap/Stack';
 
-const Add = ({ channelAction, onHide }) => {
-  const [error, setError] = useState(null);
+const validationSchema = Yup.object().shape({
+  channelName: Yup.string().trim()
+    .min(3, 'От 3 до 20 символов')
+    .max(20, 'От 3 до 20 символов')
+    .required('Обязательное поле')
+    .notOneOf([Yup.ref('channelNames')], 'Должно быть уникальным'),
+  channelNames: Yup.array(),
+});
+
+const Add = ({ channelPromise: newChannelPromise, onHide, channels }) => {
+  const channelNames = _map(channels, 'name');
 
   const inputRef = useRef();
   useEffect(() => {
     inputRef.current.focus();
-  }, []);
+  });
 
   const f = useFormik({
-    initialValues: { channelName: '' },
-    onSubmit: (values) => {
-      const err = channelAction({ name: values.channelName });
-      setError(err);
-      if (err) inputRef.current.select();
-      else onHide();
+    initialValues: { channelName: '', channelNames },
+    validationSchema,
+    onSubmit: async (values) => { // , { setSubmitting }) => {
+      try {
+        await newChannelPromise(values.channelName);
+        onHide();
+      } catch (error) {
+        console.error(error);
+        // inputRef.current.select();
+      }
     },
   });
 
   return (
-    <Modal show>
+    <Modal centered show>
       <Modal.Header closeButton onHide={onHide}>
-        <Modal.Title>Add</Modal.Title>
+        <Modal.Title>Добавить канал</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        <form onSubmit={f.handleSubmit}>
-          <FormGroup>
-            <FormControl
-              required
-              ref={inputRef}
-              onChange={f.handleChange}
-              onBlur={f.handleBlur}
-              value={f.values.channelName}
-              data-testid="input-channelName"
-              name="channelName"
-              isInvalid={error}
-            />
-            <FormControl.Feedback type="invalid" tooltip>
-              {error}
-            </FormControl.Feedback>
-          </FormGroup>
-          <input type="submit" className="btn btn-primary mt-2" value="submit" />
-        </form>
+        <Form onSubmit={f.handleSubmit}>
+          <fieldset disabled={f.isSubmitting}>
+            <Stack gap={2}>
+              <Form.Group className="position-relative">
+                <Form.Control
+                  ref={inputRef}
+                  onChange={f.handleChange}
+                  // onBlur={f.handleBlur}
+                  value={f.values.channelName}
+                  data-testid="input-channelName"
+                  name="channelName"
+                  isInvalid={f.touched.channelName && f.errors.channelName}
+                />
+                <Form.Control.Feedback type="invalid" tooltip className="position-absolute">
+                  {f.errors.channelName}
+                </Form.Control.Feedback>
+              </Form.Group>
+              <div className="d-flex justify-content-end">
+                <Button onClick={onHide} type="button" variant="secondary" className="me-2">Отменить</Button>
+                <Button type="submit" variant="primary">Отправить</Button>
+              </div>
+            </Stack>
+          </fieldset>
+        </Form>
       </Modal.Body>
     </Modal>
   );
