@@ -155,7 +155,7 @@ const SignupPage = () => {
         const { from } = location.state || { from: { pathname: '/' } };
         navigate(from);
       } catch (err) {
-        if (err.isAxiosError) {
+        if (err.isAxiosError && err.response.status === 409) {
           setSignupFailed(true);
           return;
         }

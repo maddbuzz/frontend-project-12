@@ -141,7 +141,7 @@ const LoginPage = () => {
         navigate(from);
       } catch (err) {
         //  setSubmitting(false); If async Formik will automatically set isSubmitting to false...
-        if (err.isAxiosError) {
+        if (err.isAxiosError && err.response.status === 401) {
           setAuthFailed(true);
           return;
         }
