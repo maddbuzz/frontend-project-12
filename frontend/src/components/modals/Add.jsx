@@ -1,19 +1,19 @@
 import { useFormik } from 'formik';
 import _map from 'lodash/map.js';
 import React, { useEffect, useRef } from 'react';
-import * as Yup from 'yup';
-
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Stack from 'react-bootstrap/Stack';
+import { useTranslation } from 'react-i18next';
+import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({
   channelName: Yup.string().trim()
-    .min(3, 'От 3 до 20 символов')
-    .max(20, 'От 3 до 20 символов')
-    .required('Обязательное поле')
-    .notOneOf([Yup.ref('channelNames')], 'Должно быть уникальным'),
+    .min(3, 'From 3 to 20 characters')
+    .max(20, 'From 3 to 20 characters')
+    .required('Required field')
+    .notOneOf([Yup.ref('channelNames')], 'Must be unique'),
   channelNames: Yup.array(),
 });
 
@@ -37,10 +37,12 @@ const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
     },
   });
 
+  const { t } = useTranslation();
+
   return (
     <Modal show centered onHide={onHide} keyboard>
       <Modal.Header closeButton>
-        <Modal.Title>Добавить канал</Modal.Title>
+        <Modal.Title>{t('Add channel')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -58,12 +60,12 @@ const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
                   isInvalid={f.touched.channelName && f.errors.channelName}
                 />
                 <Form.Control.Feedback type="invalid" tooltip className="position-absolute">
-                  {f.errors.channelName}
+                  {t(f.errors.channelName)}
                 </Form.Control.Feedback>
               </Form.Group>
               <div className="d-flex justify-content-end">
-                <Button onClick={onHide} variant="secondary" className="me-2">Отменить</Button>
-                <Button type="submit" variant="primary">Отправить</Button>
+                <Button onClick={onHide} variant="secondary" className="me-2">{t('Cancel')}</Button>
+                <Button type="submit" variant="primary">{t('Send')}</Button>
               </div>
             </Stack>
           </fieldset>

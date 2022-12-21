@@ -1,10 +1,11 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Provider } from 'react-redux';
 import reportWebVitals from './reportWebVitals';
 
 import App from './components/App.jsx';
+import './i18n';
 import store from './slices/index.js';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

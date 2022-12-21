@@ -1,9 +1,6 @@
 import axios from 'axios';
 import { withFormik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import * as Yup from 'yup';
-
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
@@ -13,11 +10,14 @@ import Form from 'react-bootstrap/Form';
 import Image from 'react-bootstrap/Image';
 import Row from 'react-bootstrap/Row';
 import Stack from 'react-bootstrap/Stack';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import * as Yup from 'yup';
 
 import useAuth from '../hooks/index.jsx';
 import paths from '../paths.js';
 
-const FormContainer = ({ children }) => (
+const FormContainer = ({ children, t }) => (
   <Container fluid className="h-100">
     <Row className="justify-content-center align-content-center h-100">
       <Col xs="12" md="8" xxl="6">
@@ -25,7 +25,7 @@ const FormContainer = ({ children }) => (
           <Card.Body className="p-5">
             <Row>
               <Col className="d-flex align-items-center justify-content-center">
-                <Image src="login-image.jpg" alt="Войти" roundedCircle thumbnail />
+                <Image src="login-image.jpg" alt={t('logIn')} roundedCircle thumbnail />
               </Col>
               <Col>
                 {children}
@@ -34,8 +34,8 @@ const FormContainer = ({ children }) => (
           </Card.Body>
           <Card.Footer>
             <div className="text-center">
-              <span>Нет аккаунта? </span>
-              <Link to="/signup">Регистрация</Link>
+              <span>{t('dontHaveAnAccount')}</span>
+              <Link to="/signup">{t('registration')}</Link>
             </div>
           </Card.Footer>
         </Card>
@@ -54,6 +54,7 @@ const MyForm = (props) => {
     handleSubmit,
     isSubmitting,
     authFailed,
+    t,
   } = props;
   const inputRef = useRef();
   useEffect(() => {
@@ -62,15 +63,15 @@ const MyForm = (props) => {
 
   return (
     <Form onSubmit={handleSubmit}>
-      <h1 className="text-center mb-4">Войти</h1>
+      <h1 className="text-center mb-4">{t('logIn')}</h1>
       <fieldset disabled={isSubmitting}>
         <Stack gap={4}>
-          <FloatingLabel label="Имя пользователя" className="position-relative">
+          <FloatingLabel label={t('userName')} className="position-relative">
             <Form.Control
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.username}
-              placeholder="Имя пользователя"
+              placeholder={t('userName')}
               name="username"
               id="username"
               autoComplete="username"
@@ -79,32 +80,32 @@ const MyForm = (props) => {
             />
             {authFailed && (
               <Form.Control.Feedback type="invalid" tooltip className="position-absolute top-0 start-100">
-                Неверные имя пользователя или пароль
+                {t('Invalid username or password')}
               </Form.Control.Feedback>
             )}
             {errors.username && (
               <Form.Control.Feedback type="invalid" tooltip>
-                {errors.username}
+                {t(errors.username)}
               </Form.Control.Feedback>
             )}
           </FloatingLabel>
-          <FloatingLabel label="Пароль">
+          <FloatingLabel label={t('passWord')}>
             <Form.Control
               type="password"
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.password}
-              placeholder="Пароль"
+              placeholder={t('passWord')}
               name="password"
               id="password"
               autoComplete="current-password"
               isInvalid={touched.password && errors.password}
             />
             <Form.Control.Feedback type="invalid" tooltip>
-              {errors.password}
+              {t(errors.password)}
             </Form.Control.Feedback>
           </FloatingLabel>
-          <Button type="submit" variant="outline-primary">Войти</Button>
+          <Button type="submit" variant="outline-primary">{t('logIn')}</Button>
         </Stack>
       </fieldset>
     </Form>
@@ -113,11 +114,11 @@ const MyForm = (props) => {
 
 const validationSchema = Yup.object().shape({
   username: Yup.string().trim()
-    .min(3, 'От 3 до 20 символов')
-    .max(20, 'От 3 до 20 символов')
-    .required('Обязательное поле'),
+    .min(3, 'From 3 to 20 characters')
+    .max(20, 'From 3 to 20 characters')
+    .required('Required field'),
   password: Yup.string().trim()
-    .required('Обязательное поле'),
+    .required('Required field'),
 });
 
 const LoginPage = () => {
@@ -150,9 +151,11 @@ const LoginPage = () => {
     },
   })(MyForm);
 
+  const { t } = useTranslation();
+
   return (
-    <FormContainer>
-      <MyEnhancedForm authFailed={authFailed} />
+    <FormContainer t={t}>
+      <MyEnhancedForm authFailed={authFailed} t={t} />
     </FormContainer>
   );
 };

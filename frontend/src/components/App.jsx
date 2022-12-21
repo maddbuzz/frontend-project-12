@@ -1,20 +1,19 @@
 import React, { useMemo, useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
+import Navbar from 'react-bootstrap/Navbar';
+import { useTranslation } from 'react-i18next';
 import {
   BrowserRouter as Router, Link,
   Navigate, Route, Routes, useLocation,
 } from 'react-router-dom';
 
-import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
-import Navbar from 'react-bootstrap/Navbar';
-
+import AuthContext from '../contexts/index.jsx';
+import useAuth from '../hooks/index.jsx';
 import ChatPage from './ChatPage.jsx';
 import LoginPage from './LoginPage.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
 import SignupPage from './SignupPage.jsx';
-
-import AuthContext from '../contexts/index.jsx';
-import useAuth from '../hooks/index.jsx';
 
 const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(() => {
@@ -49,10 +48,11 @@ const PrivateRoute = ({ children }) => {
 const AuthButton = () => {
   const auth = useAuth();
   // const location = useLocation();
+  const { t } = useTranslation();
   return (
     auth.userData
-      ? <Button onClick={auth.userLogOut}>Выйти</Button>
-      : null // : <Button as={Link} to="/login" state={{ from: location }}>Войти</Button>
+      ? <Button onClick={auth.userLogOut}>{t('logOut')}</Button>
+      : null // : <Button as={Link} to="/login" state={{ from: location }}>{t('logIn')}</Button>
   );
 };
 
