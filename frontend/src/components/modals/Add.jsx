@@ -4,8 +4,8 @@ import React, { useEffect, useRef } from 'react';
 import * as Yup from 'yup';
 
 import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
 import Stack from 'react-bootstrap/Stack';
 
 const validationSchema = Yup.object().shape({
@@ -17,16 +17,14 @@ const validationSchema = Yup.object().shape({
   channelNames: Yup.array(),
 });
 
-const Add = ({ channelPromise: newChannelPromise, onHide, channels }) => {
-  const channelNames = _map(channels, 'name');
-
+const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
   const inputRef = useRef();
   useEffect(() => {
     inputRef.current.focus();
   });
 
   const f = useFormik({
-    initialValues: { channelName: '', channelNames },
+    initialValues: { channelName: '', channelNames: _map(channels, 'name') },
     validationSchema,
     onSubmit: async (values) => { // , { setSubmitting }) => {
       try {
@@ -40,8 +38,8 @@ const Add = ({ channelPromise: newChannelPromise, onHide, channels }) => {
   });
 
   return (
-    <Modal centered show>
-      <Modal.Header closeButton onHide={onHide}>
+    <Modal show centered onHide={onHide} keyboard>
+      <Modal.Header closeButton>
         <Modal.Title>Добавить канал</Modal.Title>
       </Modal.Header>
 
@@ -64,7 +62,7 @@ const Add = ({ channelPromise: newChannelPromise, onHide, channels }) => {
                 </Form.Control.Feedback>
               </Form.Group>
               <div className="d-flex justify-content-end">
-                <Button onClick={onHide} type="button" variant="secondary" className="me-2">Отменить</Button>
+                <Button onClick={onHide} variant="secondary" className="me-2">Отменить</Button>
                 <Button type="submit" variant="primary">Отправить</Button>
               </div>
             </Stack>

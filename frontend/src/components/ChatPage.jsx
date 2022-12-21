@@ -3,18 +3,19 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Row from 'react-bootstrap/Row';
-// import Dropdown from 'react-bootstrap/Dropdown';
-// import DropdownButton from 'react-bootstrap/DropdownButton';
 
 import useAuth from '../hooks/index.jsx';
 import paths from '../paths.js';
-import getModal from './modals/index.js';
 import { actions as channelsActions, selectors as channelsSelectors } from '../slices/channelsSlice.js';
-import { actions as messagesActions, selectors as messagesSelectors } from '../slices/messagesSlice.js';
 import { setCurrentChannelId } from '../slices/currentChannelIdSlice.js';
+import { actions as messagesActions, selectors as messagesSelectors } from '../slices/messagesSlice.js';
+import getModal from './modals/index.js';
 
 const socketTimeoutMs = 5000;
 
@@ -40,11 +41,11 @@ const renderModal = ({
     return null;
   }
   const Component = getModal(modalInfo.type);
-  const channelPromise = socketEmitPromises[modalInfo.type];
+  const socketEmitPromise = socketEmitPromises[modalInfo.type];
   return (
     <Component
       modalInfo={modalInfo}
-      channelPromise={channelPromise}
+      socketEmitPromise={socketEmitPromise}
       onHide={hideModal}
       channels={channels}
     />
@@ -52,7 +53,7 @@ const renderModal = ({
 };
 
 const LeftCol = ({
-  channels, currentChannelId, showModal, socketEmitPromises,
+  channels, currentChannelId, showModal,
 }) => {
   const dispatch = useDispatch();
   return (
@@ -68,20 +69,28 @@ const LeftCol = ({
         </button>
       </div>
       <ul className="nav flex-column nav-pills nav-fill px-2">
-        {channels.map(({ name, id }) => (
-          <li className="nav-item w-100" key={id}>
-            <button
-              className={`w-100 rounded-0 text-start text-truncate btn${id === currentChannelId ? ' btn-secondary' : ''}`}
-              onClick={() => { dispatch(setCurrentChannelId(id)); }}
-              onContextMenu={async (e) => {
-                e.preventDefault();
-                await socketEmitPromises.removeChannel(id);
-              }}
-              type="button"
-            >
-              <span className="me-1">#</span>
-              {name}
-            </button>
+        {channels.map((c) => (
+          <li className="nav-item w-100" key={c.id}>
+            <Dropdown as={ButtonGroup} className="d-flex">
+              <Button
+                className="w-100 rounded-0 text-start text-truncate"
+                variant={c.id === currentChannelId && 'secondary'}
+                onClick={() => { dispatch(setCurrentChannelId(c.id)); }}
+              >
+                <span className="me-1">#</span>
+                {c.name}
+              </Button>
+              {c.removable && (
+                <Dropdown.Toggle
+                  split
+                  variant={c.id === currentChannelId && 'secondary'}
+                />
+              )}
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => showModal('removeChannel', c)}>Удалить</Dropdown.Item>
+                <Dropdown.Item onClick={() => showModal('renameChannel', c)}>Переименовать</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           </li>
         ))}
       </ul>
@@ -231,7 +240,8 @@ const ChatPage = () => {
       })
       .on('renameChannel', (payload) => {
         console.log('renameChannel "event"', payload);
-        dispatch(channelsActions.updateChannel(payload));
+        const { id, name } = payload;
+        dispatch(channelsActions.updateChannel({ id, changes: { name } }));
       });
   }, [auth.userData, dispatch]);
 
@@ -259,7 +269,6 @@ const ChatPage = () => {
           channels={channels}
           currentChannelId={currentChannelId}
           showModal={showModal}
-          socketEmitPromises={socketEmitPromises}
         />
         <RightCol
           currentChannel={currentChannel}

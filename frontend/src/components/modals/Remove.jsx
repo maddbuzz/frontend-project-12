@@ -1,35 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import FormGroup from 'react-bootstrap/FormGroup';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 
-// BEGIN
-const generateOnSubmit = ({ modalInfo, setItems, onHide }) => (e) => {
-  e.preventDefault();
-  setItems((items) => items.filter((i) => i.id !== modalInfo.item.id));
-  onHide();
-};
+const Remove = ({
+  modalInfo: { item: channel },
+  socketEmitPromise: removeChannelPromise,
+  onHide,
+}) => {
+  const [isSubmitting, setSubmitting] = useState(false);
 
-const Remove = (props) => {
-  const { onHide } = props;
-  const onSubmit = generateOnSubmit(props);
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await removeChannelPromise(channel.id);
+      onHide();
+    } catch (error) {
+      console.error(error);
+    }
+    setSubmitting(false);
+  };
 
   return (
-    <Modal show>
-      <Modal.Header closeButton onHide={onHide}>
-        <Modal.Title>Remove</Modal.Title>
+    <Modal show centered onHide={onHide} keyboard>
+      <Modal.Header closeButton>
+        <Modal.Title>Удалить канал</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        <form onSubmit={onSubmit}>
-          <FormGroup>
-            <input type="submit" className="btn btn-danger mt-2" value="remove" />
-          </FormGroup>
-        </form>
+        <p className="lead">Уверены?</p>
+        <Form onSubmit={onSubmit}>
+          <fieldset disabled={isSubmitting}>
+            <div className="d-flex justify-content-end">
+              <Button onClick={onHide} variant="secondary" className="me-2">Отменить</Button>
+              <Button type="submit" variant="danger">Удалить</Button>
+            </div>
+          </fieldset>
+        </Form>
       </Modal.Body>
     </Modal>
   );
 };
 
 export default Remove;
-// END
