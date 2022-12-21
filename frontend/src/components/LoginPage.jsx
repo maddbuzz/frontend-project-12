@@ -12,6 +12,7 @@ import Row from 'react-bootstrap/Row';
 import Stack from 'react-bootstrap/Stack';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
 import useAuth from '../hooks/index.jsx';
@@ -122,6 +123,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const LoginPage = () => {
+  const { t } = useTranslation();
   const auth = useAuth();
   const [authFailed, setAuthFailed] = useState(false);
   const location = useLocation();
@@ -142,16 +144,15 @@ const LoginPage = () => {
         navigate(from);
       } catch (err) {
         //  setSubmitting(false); If async Formik will automatically set isSubmitting to false...
-        if (err.isAxiosError && err.response.status === 401) {
-          setAuthFailed(true);
+        if (err.isAxiosError) {
+          if (err.response?.status === 401) setAuthFailed(true);
+          else toast.error(t('Connection error'));
           return;
         }
         throw err;
       }
     },
   })(MyForm);
-
-  const { t } = useTranslation();
 
   return (
     <FormContainer t={t}>

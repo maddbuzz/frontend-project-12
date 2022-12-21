@@ -1,16 +1,15 @@
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { io } from 'socket.io-client';
-// import { useTranslation, Trans } from 'react-i18next';
-import { useTranslation } from 'react-i18next';
-
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Row from 'react-bootstrap/Row';
+import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import { io } from 'socket.io-client';
 
 import useAuth from '../hooks/index.jsx';
 import paths from '../paths.js';
@@ -195,6 +194,7 @@ const getAuthHeader = (userData) => (
 );
 
 const ChatPage = () => {
+  const { t } = useTranslation();
   const auth = useAuth();
   const dispatch = useDispatch();
 
@@ -216,8 +216,9 @@ const ChatPage = () => {
     console.log('ChatPage fetching content...');
     fetchContent();
 
-    socket.off(); // remove all listeners for all events !!!
-    console.log(`Subscribe for socket events (socket.id=${socket.id})`);
+    // socket.off(); // remove all listeners for all events ? No !
+    socket.removeAllListeners(); // remove all listeners for all events ? Yes !
+    console.log(`(re)subscribe for socket events (socket.id=${socket.id})`);
     socket
       .on('connect', () => {
         console.log(`socket "connect" id=${socket.id}`);
@@ -236,17 +237,20 @@ const ChatPage = () => {
       .on('newChannel', (payload) => {
         console.log('newChannel "event"', payload);
         dispatch(channelsActions.addChannel(payload));
+        toast.info(t('Channel created'));
       })
       .on('removeChannel', (payload) => {
         console.log('removeChannel "event"', payload);
         dispatch(channelsActions.removeChannel(payload.id));
+        toast.info(t('Channel removed'));
       })
       .on('renameChannel', (payload) => {
         console.log('renameChannel "event"', payload);
         const { id, name } = payload;
         dispatch(channelsActions.updateChannel({ id, changes: { name } }));
+        toast.info(t('Channel renamed'));
       });
-  }, [auth.userData, dispatch]);
+  }, [auth.userData, dispatch, t]);
 
   const socketEmitPromises = {
     newMessage: (message) => getSocketEmitPromise(
@@ -264,8 +268,6 @@ const ChatPage = () => {
   const [modalInfo, setModalInfo] = useState({ type: null, item: null });
   const hideModal = () => setModalInfo({ type: null, item: null });
   const showModal = (type, item = null) => setModalInfo({ type, item });
-
-  const { t } = useTranslation();
 
   return (
     <Container className="h-100 my-4 overflow-hidden rounded shadow">

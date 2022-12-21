@@ -2,7 +2,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
+import { ToastContainer } from 'react-toastify';
 import reportWebVitals from './reportWebVitals';
+
+// import 'react-toastify/dist/ReactToastify.css';
+// minified version is also included
+import 'react-toastify/dist/ReactToastify.min.css';
 
 import App from './components/App.jsx';
 import './i18n';
@@ -13,6 +18,7 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <App />
+      <ToastContainer pauseOnFocusLoss={false} />
     </Provider>
   </React.StrictMode>,
 );

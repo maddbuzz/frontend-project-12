@@ -12,6 +12,7 @@ import Row from 'react-bootstrap/Row';
 import Stack from 'react-bootstrap/Stack';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
 import useAuth from '../hooks/index.jsx';
@@ -136,6 +137,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const SignupPage = () => {
+  const { t } = useTranslation();
   const auth = useAuth();
   const [signupFailed, setSignupFailed] = useState(false);
   const location = useLocation();
@@ -156,16 +158,15 @@ const SignupPage = () => {
         const { from } = location.state || { from: { pathname: '/' } };
         navigate(from);
       } catch (err) {
-        if (err.isAxiosError && err.response.status === 409) {
-          setSignupFailed(true);
+        if (err.isAxiosError) {
+          if (err.response?.status === 409) setSignupFailed(true);
+          else toast.error(t('Connection error'));
           return;
         }
         throw err;
       }
     },
   })(MyForm);
-
-  const { t } = useTranslation();
 
   return (
     <FormContainer t={t}>
