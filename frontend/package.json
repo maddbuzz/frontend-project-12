@@ -12,6 +12,7 @@
     "bootstrap": "^5.2.3",
     "formik": "^2.2.9",
     "i18next": "^22.4.6",
+    "leo-profanity": "^1.7.0",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "match-sorter": "^6.3.1",

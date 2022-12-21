@@ -56,7 +56,7 @@ const AuthButton = () => {
   );
 };
 
-const App = () => (
+const App = ({ profanityFilter }) => (
   <AuthProvider>
     <Router>
       <div className="d-flex flex-column vh-100">
@@ -75,7 +75,7 @@ const App = () => (
             path="/"
             element={(
               <PrivateRoute>
-                <ChatPage />
+                <ChatPage profanityFilter={profanityFilter} />
               </PrivateRoute>
             )}
           />

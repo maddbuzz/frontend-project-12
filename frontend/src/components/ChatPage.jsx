@@ -119,7 +119,7 @@ const MessagesBox = ({ channelMessages }) => {
   );
 };
 
-const SendingForm = ({ newMessagePromise, t }) => {
+const SendingForm = ({ newMessagePromise, t, profanityFilter }) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -132,9 +132,10 @@ const SendingForm = ({ newMessagePromise, t }) => {
     e.preventDefault();
     const trimmedMessage = message.trim();
     if (!trimmedMessage.length) return;
+    const cleanedMessage = profanityFilter.clean(trimmedMessage);
     setSubmitting(true);
     try {
-      await newMessagePromise(trimmedMessage);
+      await newMessagePromise(cleanedMessage);
       setMessage('');
     } catch (err) {
       console.error(err);
@@ -170,7 +171,7 @@ const SendingForm = ({ newMessagePromise, t }) => {
 };
 
 const RightCol = ({
-  currentChannel, channelMessages, newMessagePromise, t,
+  currentChannel, channelMessages, newMessagePromise, t, profanityFilter,
 }) => (
   <Col className="p-0 h-100">
     <div className="d-flex flex-column h-100">
@@ -184,6 +185,7 @@ const RightCol = ({
       <SendingForm
         newMessagePromise={newMessagePromise}
         t={t}
+        profanityFilter={profanityFilter}
       />
     </div>
   </Col>
@@ -193,7 +195,7 @@ const getAuthHeader = (userData) => (
   userData?.token ? { Authorization: `Bearer ${userData.token}` } : {}
 );
 
-const ChatPage = () => {
+const ChatPage = ({ profanityFilter }) => {
   const { t } = useTranslation();
   const auth = useAuth();
   const dispatch = useDispatch();
@@ -283,6 +285,7 @@ const ChatPage = () => {
           currentChannel={currentChannel}
           channelMessages={channelMessages}
           newMessagePromise={socketEmitPromises.newMessage}
+          profanityFilter={profanityFilter}
         />
       </Row>
       {renderModal({
