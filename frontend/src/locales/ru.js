@@ -32,5 +32,8 @@ export default {
     'Rename channel': 'Переименовать канал',
     'Delete channel': 'Удалить канал',
     'Are you sure': 'Вы уверены?',
+    'Page not found': 'Страница не найдена',
+    'But you can go ': 'Но вы можете перейти ',
+    'to the main page': 'на главную страницу',
   },
 };
