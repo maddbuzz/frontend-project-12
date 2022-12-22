@@ -33,7 +33,7 @@ const FormContainer = ({ children, t }) => (
               </Col>
             </Row>
           </Card.Body>
-          <Card.Footer>
+          <Card.Footer className="p-4">
             <div className="text-center">
               <span>{t('Don\'t have an account? ')}</span>
               <Link to="/signup">{t('Registration')}</Link>
@@ -67,12 +67,12 @@ const MyForm = (props) => {
       <h1 className="text-center mb-4">{t('Login')}</h1>
       <fieldset disabled={isSubmitting}>
         <Stack gap={4}>
-          <FloatingLabel label={t('Username')} className="position-relative">
+          <FloatingLabel label={t('Your nickname')} className="position-relative">
             <Form.Control
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.username}
-              placeholder={t('Username')}
+              placeholder={t('Your nickname')}
               name="username"
               id="username"
               autoComplete="username"

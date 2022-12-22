@@ -37,5 +37,6 @@ export default {
     'to the main page': 'на главную страницу',
     'Channel management': 'Управление каналом',
     'A new message': 'Новое сообщение',
+    'Your nickname': 'Ваш ник',
   },
 };
