@@ -26,7 +26,7 @@ const FormContainer = ({ children, t }) => (
           <Card.Body className="p-5">
             <Row>
               <Col className="d-flex align-items-center justify-content-center">
-                <Image src="login-image.jpg" alt={t('logIn')} roundedCircle thumbnail />
+                <Image src="login-image.jpg" alt={t('Login')} roundedCircle thumbnail />
               </Col>
               <Col>
                 {children}
@@ -35,8 +35,8 @@ const FormContainer = ({ children, t }) => (
           </Card.Body>
           <Card.Footer>
             <div className="text-center">
-              <span>{t('dontHaveAnAccount')}</span>
-              <Link to="/signup">{t('registration')}</Link>
+              <span>{t('Don\'t have an account? ')}</span>
+              <Link to="/signup">{t('Registration')}</Link>
             </div>
           </Card.Footer>
         </Card>
@@ -64,15 +64,15 @@ const MyForm = (props) => {
 
   return (
     <Form onSubmit={handleSubmit}>
-      <h1 className="text-center mb-4">{t('logIn')}</h1>
+      <h1 className="text-center mb-4">{t('Login')}</h1>
       <fieldset disabled={isSubmitting}>
         <Stack gap={4}>
-          <FloatingLabel label={t('userName')} className="position-relative">
+          <FloatingLabel label={t('Username')} className="position-relative">
             <Form.Control
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.username}
-              placeholder={t('userName')}
+              placeholder={t('Username')}
               name="username"
               id="username"
               autoComplete="username"
@@ -90,13 +90,13 @@ const MyForm = (props) => {
               </Form.Control.Feedback>
             )}
           </FloatingLabel>
-          <FloatingLabel label={t('passWord')}>
+          <FloatingLabel label={t('Password')}>
             <Form.Control
               type="password"
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.password}
-              placeholder={t('passWord')}
+              placeholder={t('Password')}
               name="password"
               id="password"
               autoComplete="current-password"
@@ -106,7 +106,7 @@ const MyForm = (props) => {
               {t(errors.password)}
             </Form.Control.Feedback>
           </FloatingLabel>
-          <Button type="submit" variant="outline-primary">{t('logIn')}</Button>
+          <Button type="submit" variant="outline-primary">{t('Login')}</Button>
         </Stack>
       </fieldset>
     </Form>

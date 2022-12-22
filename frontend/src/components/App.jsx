@@ -51,8 +51,8 @@ const AuthButton = () => {
   const { t } = useTranslation();
   return (
     auth.userData
-      ? <Button onClick={auth.userLogOut}>{t('logOut')}</Button>
-      : null // : <Button as={Link} to="/login" state={{ from: location }}>{t('logIn')}</Button>
+      ? <Button onClick={auth.userLogOut}>{t('Logout')}</Button>
+      : null // : <Button as={Link} to="/login" state={{ from: location }}>{t('Login')}</Button>
   );
 };
 

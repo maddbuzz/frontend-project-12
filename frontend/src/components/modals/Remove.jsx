@@ -32,7 +32,7 @@ const Remove = ({
       </Modal.Header>
 
       <Modal.Body>
-        <p className="lead">{t('Are you sure')}</p>
+        <p className="lead">{t('Are you sure?')}</p>
         <Form onSubmit={onSubmit}>
           <fieldset disabled={isSubmitting}>
             <div className="d-flex justify-content-end">

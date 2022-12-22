@@ -26,7 +26,7 @@ const FormContainer = ({ children, t }) => (
           <Card.Body className="p-5">
             <Row>
               <Col className="d-flex align-items-center justify-content-center">
-                <Image src="avatar_1.6084447160acc893a24d.jpg" alt={t('registration')} roundedCircle thumbnail />
+                <Image src="avatar_1.6084447160acc893a24d.jpg" alt={t('Registration')} roundedCircle thumbnail />
               </Col>
               <Col>
                 {children}
@@ -58,15 +58,15 @@ const MyForm = (props) => {
 
   return (
     <Form onSubmit={handleSubmit}>
-      <h1 className="text-center mb-4">{t('registration')}</h1>
+      <h1 className="text-center mb-4">{t('Registration')}</h1>
       <fieldset disabled={isSubmitting}>
         <Stack gap={2}>
-          <FloatingLabel label={t('userName')} className="position-relative">
+          <FloatingLabel label={t('Username')} className="position-relative">
             <Form.Control
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.username}
-              placeholder={t('userName')}
+              placeholder={t('Username')}
               name="username"
               id="username"
               autoComplete="username"
@@ -84,13 +84,13 @@ const MyForm = (props) => {
               </Form.Control.Feedback>
             )}
           </FloatingLabel>
-          <FloatingLabel label={t('passWord')}>
+          <FloatingLabel label={t('Password')}>
             <Form.Control
               type="password"
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.password}
-              placeholder={t('passWord')}
+              placeholder={t('Password')}
               name="password"
               id="password"
               autoComplete="current-password"
@@ -116,7 +116,7 @@ const MyForm = (props) => {
               {t(errors.passwordConfirmation)}
             </Form.Control.Feedback>
           </FloatingLabel>
-          <Button type="submit" variant="outline-primary">{t('register')}</Button>
+          <Button type="submit" variant="outline-primary">{t('Register')}</Button>
         </Stack>
       </fieldset>
     </Form>
