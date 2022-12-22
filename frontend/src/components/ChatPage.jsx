@@ -219,8 +219,8 @@ const ChatPage = ({ profanityFilter }) => {
     fetchContent();
 
     // socket.off(); // remove all listeners for all events ? No !
-    socket.removeAllListeners(); // remove all listeners for all events ? Yes !
-    console.log(`(re)subscribe for socket events (socket.id=${socket.id})`);
+    // socket.removeAllListeners(); // remove all listeners for all events ? Yes !
+    console.log(`Subscribe for socket events (socket.id=${socket.id})`);
     socket
       .on('connect', () => {
         console.log(`socket "connect" id=${socket.id}`);
@@ -252,6 +252,11 @@ const ChatPage = ({ profanityFilter }) => {
         dispatch(channelsActions.updateChannel({ id, changes: { name } }));
         toast.info(t('Channel renamed'));
       });
+
+    return () => {
+      socket.removeAllListeners(); // remove all listeners for all events ? Yes !
+      console.log(`Unsubscribe from socket events (socket.id=${socket.id})`);
+    };
   }, [auth.userData, dispatch, t]);
 
   const socketEmitPromises = {
