@@ -15,7 +15,7 @@ import App from './components/App.jsx';
 import './i18n';
 import store from './slices/index.js';
 
-profanityFilter.loadDictionary('ru'); // replace current dictionary with the Russian
+// profanityFilter.loadDictionary('ru'); // replace current dictionary with the Russian
 
 const rollbarConfig = {
   accessToken: 'f7c9e7e2f6e24c289ccf9d39e612441d',
