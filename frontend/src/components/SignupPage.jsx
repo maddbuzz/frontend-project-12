@@ -61,14 +61,13 @@ const MyForm = (props) => {
       <h1 className="text-center mb-4">{t('Registration')}</h1>
       <fieldset disabled={isSubmitting}>
         <Stack gap={2}>
-          <FloatingLabel label={t('Username')} className="position-relative">
+          <FloatingLabel controlId="floatingUsername" label={t('Username')} className="position-relative">
             <Form.Control
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.username}
               placeholder={t('Username')}
               name="username"
-              id="username"
               autoComplete="username"
               isInvalid={signupFailed || (touched.username && errors.username)}
               ref={inputRef}
@@ -84,7 +83,7 @@ const MyForm = (props) => {
               </Form.Control.Feedback>
             )}
           </FloatingLabel>
-          <FloatingLabel label={t('Password')}>
+          <FloatingLabel controlId="floatingPassword" label={t('Password')}>
             <Form.Control
               type="password"
               onChange={handleChange}
@@ -92,7 +91,6 @@ const MyForm = (props) => {
               value={values.password}
               placeholder={t('Password')}
               name="password"
-              id="password"
               autoComplete="current-password"
               isInvalid={touched.password && errors.password}
             />
@@ -100,7 +98,7 @@ const MyForm = (props) => {
               {t(errors.password)}
             </Form.Control.Feedback>
           </FloatingLabel>
-          <FloatingLabel label={t('Confirm the password')}>
+          <FloatingLabel controlId="floatingPasswordConfirmation" label={t('Confirm the password')}>
             <Form.Control
               type="password"
               onChange={handleChange}
@@ -108,7 +106,6 @@ const MyForm = (props) => {
               value={values.passwordConfirmation}
               placeholder={t('Confirm the password')}
               name="passwordConfirmation"
-              id="passwordConfirmation"
               autoComplete="current-passwordConfirmation"
               isInvalid={touched.passwordConfirmation && errors.passwordConfirmation}
             />
