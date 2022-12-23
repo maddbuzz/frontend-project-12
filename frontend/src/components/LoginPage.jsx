@@ -120,12 +120,32 @@ const validationSchema = Yup.object().shape({
     .required('Required field'),
 });
 
-const LoginPage = () => {
-  const { t } = useTranslation();
+const useSubmit = (setAuthFailed, t) => {
   const auth = useAuth();
-  const [authFailed, setAuthFailed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  return async (values) => { // (values, { setSubmitting }) => {
+    setAuthFailed(false);
+    try {
+      const res = await axios.post(paths.loginPath(), values);
+      auth.userLogIn(res.data);
+      const { from } = location.state || { from: { pathname: '/' } };
+      navigate(from);
+    } catch (err) {
+      if (!err.isAxiosError) throw err;
+      if (err.response?.status === 401) setAuthFailed(true);
+      else toast.error(t('Connection error'));
+      console.error(err);
+    } finally {
+      // setSubmitting(false); If async Formik will automatically set isSubmitting to false...
+    }
+  };
+};
+
+const LoginPage = () => {
+  const { t } = useTranslation();
+  const [authFailed, setAuthFailed] = useState(false);
 
   const MyEnhancedForm = withFormik({
     mapPropsToValues: () => ({
@@ -133,25 +153,7 @@ const LoginPage = () => {
       password: '',
     }),
     validationSchema,
-    handleSubmit: async (values) => { // (values, { setSubmitting }) => {
-      setAuthFailed(false);
-      try {
-        const res = await axios.post(paths.loginPath(), values);
-        auth.userLogIn(res.data);
-        const { from } = location.state || { from: { pathname: '/' } };
-        navigate(from);
-      } catch (err) {
-        if (err.isAxiosError) {
-          if (err.response?.status === 401) setAuthFailed(true);
-          else toast.error(t('Connection error'));
-          console.error(err);
-          return;
-        }
-        throw err;
-      } finally {
-        // setSubmitting(false); If async Formik will automatically set isSubmitting to false...
-      }
-    },
+    handleSubmit: useSubmit(setAuthFailed, t),
   })(MyForm);
 
   return (
