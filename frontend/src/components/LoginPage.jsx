@@ -67,14 +67,13 @@ const MyForm = (props) => {
       <h1 className="text-center mb-4">{t('Login')}</h1>
       <fieldset disabled={isSubmitting}>
         <Stack gap={4}>
-          <FloatingLabel label={t('Your nickname')} className="position-relative">
+          <FloatingLabel controlId="floatingUsername" label={t('Your nickname')} className="position-relative">
             <Form.Control
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.username}
               placeholder={t('Your nickname')}
               name="username"
-              id="username"
               autoComplete="username"
               isInvalid={authFailed || (touched.username && errors.username)}
               ref={inputRef}
@@ -90,7 +89,7 @@ const MyForm = (props) => {
               </Form.Control.Feedback>
             )}
           </FloatingLabel>
-          <FloatingLabel label={t('Password')}>
+          <FloatingLabel controlId="floatingPassword" label={t('Password')}>
             <Form.Control
               type="password"
               onChange={handleChange}
@@ -98,7 +97,6 @@ const MyForm = (props) => {
               value={values.password}
               placeholder={t('Password')}
               name="password"
-              id="password"
               autoComplete="current-password"
               isInvalid={touched.password && errors.password}
             />
