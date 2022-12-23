@@ -31,6 +31,8 @@ const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
       try {
         await newChannelPromise(values.channelName);
         onHide();
+      } catch (err) {
+        console.error(err);
       } finally {
         // setSubmitting(false); If async Formik will automatically set isSubmitting to false...
       }

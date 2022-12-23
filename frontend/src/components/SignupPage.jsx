@@ -158,6 +158,8 @@ const SignupPage = () => {
         if (err.isAxiosError) {
           if (err.response?.status === 409) setSignupFailed(true);
           else toast.error(t('Connection error'));
+          console.error(err);
+          return;
         }
         throw err;
       } finally {

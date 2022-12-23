@@ -17,6 +17,8 @@ const Remove = ({
     try {
       await removeChannelPromise(channel.id);
       onHide();
+    } catch (err) {
+      console.error(err);
     } finally {
       setSubmitting(false);
     }

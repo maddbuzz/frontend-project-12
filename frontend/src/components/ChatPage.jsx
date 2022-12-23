@@ -139,6 +139,8 @@ const SendingForm = ({ newMessagePromise, t, profanityFilter }) => {
     try {
       await newMessagePromise(cleanedMessage);
       setMessage('');
+    } catch (err) {
+      console.error(err);
     } finally {
       setSubmitting(false);
     }

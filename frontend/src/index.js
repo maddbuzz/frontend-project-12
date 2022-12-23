@@ -19,7 +19,7 @@ import store from './slices/index.js';
 
 const rollbarConfig = {
   accessToken: 'f7c9e7e2f6e24c289ccf9d39e612441d',
-  environment: 'testenv',
+  environment: 'production', // 'testenv',
 };
 /*
 function TestError() {

@@ -144,6 +144,8 @@ const LoginPage = () => {
         if (err.isAxiosError) {
           if (err.response?.status === 401) setAuthFailed(true);
           else toast.error(t('Connection error'));
+          console.error(err);
+          return;
         }
         throw err;
       } finally {
