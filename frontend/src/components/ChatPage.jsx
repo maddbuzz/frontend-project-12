@@ -280,10 +280,7 @@ const ChatPage = ({ profanityFilter }) => {
       'newMessage',
       { body: message, channelId: currentChannelId, username: auth.userData.username },
     ),
-    newChannel: async (name) => {
-      const { data: channelWithId } = await getSocketEmitPromise('newChannel', { name });
-      dispatch(setCurrentChannelId(channelWithId.id));
-    },
+    newChannel: (name) => getSocketEmitPromise('newChannel', { name }),
     removeChannel: (id) => getSocketEmitPromise('removeChannel', { id }),
     renameChannel: (id, name) => getSocketEmitPromise('renameChannel', { id, name }),
   };

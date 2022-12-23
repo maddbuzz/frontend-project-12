@@ -7,7 +7,10 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Stack from 'react-bootstrap/Stack';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import * as Yup from 'yup';
+
+import { setCurrentChannelId } from '../../slices/currentChannelIdSlice.js';
 
 const validationSchema = Yup.object().shape({
   channelName: Yup.string().trim()
@@ -23,13 +26,15 @@ const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
   useEffect(() => {
     inputRef.current.focus();
   });
+  const dispatch = useDispatch();
 
   const f = useFormik({
     initialValues: { channelName: '', channelNames: _map(channels, 'name') },
     validationSchema,
     onSubmit: async (values) => { // , { setSubmitting }) => {
       try {
-        await newChannelPromise(values.channelName);
+        const { data: channelWithId } = await newChannelPromise(values.channelName);
+        dispatch(setCurrentChannelId(channelWithId.id));
         onHide();
       } catch (err) {
         console.error(err);
