@@ -38,5 +38,6 @@ export default {
     'Channel management': 'Управление каналом',
     'A new message': 'Новое сообщение',
     'Your nickname': 'Ваш ник',
+    'Channel name': 'Имя канала',
   },
 };

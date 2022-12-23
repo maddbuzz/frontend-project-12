@@ -56,7 +56,8 @@ const Rename = ({
         <Form onSubmit={f.handleSubmit}>
           <fieldset disabled={f.isSubmitting}>
             <Stack gap={2}>
-              <Form.Group className="position-relative">
+              <Form.Group controlId="formChannelName" className="position-relative">
+                <Form.Label visuallyHidden>{t('Channel name')}</Form.Label>
                 <Form.Control
                   ref={inputRef}
                   onChange={f.handleChange}
