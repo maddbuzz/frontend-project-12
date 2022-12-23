@@ -8,6 +8,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Row from 'react-bootstrap/Row';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 
@@ -202,6 +203,7 @@ const ChatPage = ({ profanityFilter }) => {
   const { t } = useTranslation();
   const auth = useAuth();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const currentChannelId = useSelector((state) => state.currentChannelId.value);
   const currentChannel = useSelector(
@@ -214,9 +216,20 @@ const ChatPage = ({ profanityFilter }) => {
 
   useEffect(() => {
     const fetchContent = async () => {
-      const { data } = await axios.get(paths.dataPath(), { headers: getAuthHeader(auth.userData) });
-      dispatch(channelsActions.setChannels(data.channels));
-      dispatch(messagesActions.setMessages(data.messages));
+      try {
+        const { data } = await axios
+          .get(paths.dataPath(), { headers: getAuthHeader(auth.userData) });
+        dispatch(channelsActions.setChannels(data.channels));
+        dispatch(messagesActions.setMessages(data.messages));
+      } catch (err) {
+        if (err.isAxiosError) {
+          console.error(err);
+          if (err.response?.status === 401) navigate('/login');
+          else toast.error(t('Connection error'));
+          return;
+        }
+        throw err;
+      }
     };
     console.log('ChatPage fetching content...');
     fetchContent();
@@ -260,7 +273,7 @@ const ChatPage = ({ profanityFilter }) => {
       socket.removeAllListeners(); // remove all listeners for all events ? Yes !
       console.log(`Unsubscribe from socket events (socket.id=${socket.id})`);
     };
-  }, [auth.userData, dispatch, t]);
+  }, [auth.userData, dispatch, t, navigate]);
 
   const socketEmitPromises = {
     newMessage: (message) => getSocketEmitPromise(

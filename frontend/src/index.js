@@ -16,20 +16,19 @@ import './i18n';
 import store from './slices/index.js';
 
 // profanityFilter.loadDictionary('ru'); // replace current dictionary with the Russian
+const russianDictionary = profanityFilter.getDictionary('ru');
+profanityFilter.add(russianDictionary);
 
 const rollbarConfig = {
   accessToken: 'f7c9e7e2f6e24c289ccf9d39e612441d',
   environment: 'production', // 'testenv',
 };
 /*
-function TestError() {
-  const a = null;
-  return a.hello();
-}
 RollbarProvider instantiates Rollbar client instance handling any uncaught errors or unhandled
 promises in the browser.
 ErrorBoundary catches all React errors in the tree below and logs them to Rollbar.
 */
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
