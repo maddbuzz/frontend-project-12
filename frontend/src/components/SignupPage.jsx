@@ -158,9 +158,10 @@ const SignupPage = () => {
         if (err.isAxiosError) {
           if (err.response?.status === 409) setSignupFailed(true);
           else toast.error(t('Connection error'));
-          return;
         }
         throw err;
+      } finally {
+        // setSubmitting(false); If async Formik will automatically set isSubmitting to false...
       }
     },
   })(MyForm);

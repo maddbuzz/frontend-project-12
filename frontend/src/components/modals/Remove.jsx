@@ -17,10 +17,9 @@ const Remove = ({
     try {
       await removeChannelPromise(channel.id);
       onHide();
-    } catch (error) {
-      console.error(error);
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   const { t } = useTranslation();

@@ -38,9 +38,8 @@ const Rename = ({
       try {
         await renameChannelPromise(channel.id, values.channelName);
         onHide();
-      } catch (error) {
-        console.error(error);
-        // inputRef.current.select();
+      } finally {
+        // setSubmitting(false); If async Formik will automatically set isSubmitting to false...
       }
     },
   });

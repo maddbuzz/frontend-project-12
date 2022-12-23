@@ -141,13 +141,13 @@ const LoginPage = () => {
         const { from } = location.state || { from: { pathname: '/' } };
         navigate(from);
       } catch (err) {
-        //  setSubmitting(false); If async Formik will automatically set isSubmitting to false...
         if (err.isAxiosError) {
           if (err.response?.status === 401) setAuthFailed(true);
           else toast.error(t('Connection error'));
-          return;
         }
         throw err;
+      } finally {
+        // setSubmitting(false); If async Formik will automatically set isSubmitting to false...
       }
     },
   })(MyForm);
