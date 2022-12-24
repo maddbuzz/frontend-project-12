@@ -11,7 +11,7 @@ import Image from 'react-bootstrap/Image';
 import Row from 'react-bootstrap/Row';
 import Stack from 'react-bootstrap/Stack';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
@@ -36,7 +36,7 @@ const FormContainer = ({ children, t }) => (
           <Card.Footer className="p-4">
             <div className="text-center">
               <span>{t('Don\'t have an account? ')}</span>
-              <Link to="/signup">{t('Registration')}</Link>
+              <Link to={paths.signupPagePath()}>{t('Registration')}</Link>
             </div>
           </Card.Footer>
         </Card>
@@ -122,21 +122,19 @@ const validationSchema = Yup.object().shape({
 
 const useSubmit = (setAuthFailed, t) => {
   const auth = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
 
   return async (values) => { // (values, { setSubmitting }) => {
     setAuthFailed(false);
     try {
-      const res = await axios.post(paths.loginPath(), values);
+      const res = await axios.post(paths.loginApiPath(), values);
       auth.userLogIn(res.data);
-      const { from } = location.state || { from: { pathname: '/' } };
-      navigate(from);
+      navigate(paths.chatPagePath());
     } catch (err) {
       if (!err.isAxiosError) throw err;
+      console.error(err);
       if (err.response?.status === 401) setAuthFailed(true);
       else toast.error(t('Connection error'));
-      console.error(err);
     } finally {
       // setSubmitting(false); If async Formik will automatically set isSubmitting to false...
     }

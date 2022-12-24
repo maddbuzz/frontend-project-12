@@ -5,11 +5,12 @@ import Navbar from 'react-bootstrap/Navbar';
 import { useTranslation } from 'react-i18next';
 import {
   BrowserRouter as Router, Link,
-  Navigate, Route, Routes, useLocation,
+  Navigate, Route, Routes,
 } from 'react-router-dom';
 
 import AuthContext from '../contexts/index.jsx';
 import useAuth from '../hooks/index.jsx';
+import paths from '../paths.js';
 import ChatPage from './ChatPage.jsx';
 import LoginPage from './LoginPage.jsx';
 import NotFoundPage from './NotFoundPage.jsx';
@@ -39,21 +40,13 @@ const AuthProvider = ({ children }) => {
 
 const PrivateRoute = ({ children }) => {
   const auth = useAuth();
-  const location = useLocation();
-  return (
-    auth.userData ? children : <Navigate to="/login" state={{ from: location }} />
-  );
+  return auth.userData ? children : <Navigate to={paths.loginPagePath()} />;
 };
 
 const AuthButton = () => {
   const auth = useAuth();
-  // const location = useLocation();
   const { t } = useTranslation();
-  return (
-    auth.userData
-      ? <Button onClick={auth.userLogOut}>{t('Logout')}</Button>
-      : null // : <Button as={Link} to="/login" state={{ from: location }}>{t('Login')}</Button>
-  );
+  return auth.userData && <Button onClick={auth.userLogOut}>{t('Logout')}</Button>;
 };
 
 const App = ({ profanityFilter }) => (
@@ -63,16 +56,16 @@ const App = ({ profanityFilter }) => (
 
         <Navbar className="shadow-sm navbar-expand-lg navbar-light bg-white">
           <Container>
-            <Navbar.Brand as={Link} to="/">Hexlet Chat</Navbar.Brand>
+            <Navbar.Brand as={Link} to={paths.chatPagePath()}>Hexlet Chat</Navbar.Brand>
             <AuthButton />
           </Container>
         </Navbar>
 
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          <Route path={paths.loginPagePath()} element={<LoginPage />} />
+          <Route path={paths.signupPagePath()} element={<SignupPage />} />
           <Route
-            path="/"
+            path={paths.chatPagePath()}
             element={(
               <PrivateRoute>
                 <ChatPage profanityFilter={profanityFilter} />

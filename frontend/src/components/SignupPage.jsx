@@ -11,7 +11,7 @@ import Image from 'react-bootstrap/Image';
 import Row from 'react-bootstrap/Row';
 import Stack from 'react-bootstrap/Stack';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 
@@ -133,12 +133,30 @@ const validationSchema = Yup.object().shape({
     .required('Required field'),
 });
 
+const useSubmit = (setSignupFailed, t) => {
+  const auth = useAuth();
+  const navigate = useNavigate();
+
+  return async (values) => {
+    setSignupFailed(false);
+    try {
+      const res = await axios.post(paths.signupApiPath(), values);
+      auth.userLogIn(res.data);
+      navigate(paths.chatPagePath());
+    } catch (err) {
+      if (!err.isAxiosError) throw err;
+      console.error(err);
+      if (err.response?.status === 409) setSignupFailed(true);
+      else toast.error(t('Connection error'));
+    } finally {
+      // setSubmitting(false); If async Formik will automatically set isSubmitting to false...
+    }
+  };
+};
+
 const SignupPage = () => {
   const { t } = useTranslation();
-  const auth = useAuth();
   const [signupFailed, setSignupFailed] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
 
   const MyEnhancedForm = withFormik({
     mapPropsToValues: () => ({
@@ -147,25 +165,7 @@ const SignupPage = () => {
       passwordConfirmation: '',
     }),
     validationSchema,
-    handleSubmit: async (values) => {
-      setSignupFailed(false);
-      try {
-        const res = await axios.post(paths.signupPath(), values);
-        auth.userLogIn(res.data);
-        const { from } = location.state || { from: { pathname: '/' } };
-        navigate(from);
-      } catch (err) {
-        if (err.isAxiosError) {
-          if (err.response?.status === 409) setSignupFailed(true);
-          else toast.error(t('Connection error'));
-          console.error(err);
-          return;
-        }
-        throw err;
-      } finally {
-        // setSubmitting(false); If async Formik will automatically set isSubmitting to false...
-      }
-    },
+    handleSubmit: useSubmit(setSignupFailed, t),
   })(MyForm);
 
   return (

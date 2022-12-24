@@ -218,17 +218,14 @@ const ChatPage = ({ profanityFilter }) => {
     const fetchContent = async () => {
       try {
         const { data } = await axios
-          .get(paths.dataPath(), { headers: getAuthHeader(auth.userData) });
+          .get(paths.dataApiPath(), { headers: getAuthHeader(auth.userData) });
         dispatch(channelsActions.setChannels(data.channels));
         dispatch(messagesActions.setMessages(data.messages));
       } catch (err) {
-        if (err.isAxiosError) {
-          console.error(err);
-          if (err.response?.status === 401) navigate('/login');
-          else toast.error(t('Connection error'));
-          return;
-        }
-        throw err;
+        if (!err.isAxiosError) throw err;
+        console.error(err);
+        if (err.response?.status === 401) navigate(paths.loginPagePath());
+        else toast.error(t('Connection error'));
       }
     };
     console.log('ChatPage fetching content...');
