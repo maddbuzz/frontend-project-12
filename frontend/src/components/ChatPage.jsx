@@ -1,4 +1,5 @@
 import axios from 'axios';
+import profanityFilter from 'leo-profanity';
 import { useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -10,31 +11,13 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { io } from 'socket.io-client';
 
-import useAuth from '../hooks/index.jsx';
+import { useAuth, useSocketApi } from '../hooks/index.jsx';
 import paths from '../paths.js';
 import { actions as channelsActions, selectors as channelsSelectors } from '../slices/channelsSlice.js';
 import { setCurrentChannelId } from '../slices/currentChannelIdSlice.js';
 import { actions as messagesActions, selectors as messagesSelectors } from '../slices/messagesSlice.js';
 import getModal from './modals/index.js';
-
-const socketTimeoutMs = 5000;
-
-const socket = io();
-
-const getSocketEmitPromise = (eventName, ...args) => new Promise((resolve, reject) => {
-  socket.timeout(socketTimeoutMs).emit(eventName, ...args, (err, response) => {
-    //     console.log(`<new Promise socketCallback(
-    //     eventName=${eventName}
-    //     args=${JSON.stringify(args)}
-    //     err=${JSON.stringify(err)}
-    //     response=${JSON.stringify(response)}
-    // )>`);
-    if (err) reject(err); // the other side did not acknowledge the event in the given delay
-    resolve(response);
-  });
-});
 
 const renderModal = ({
   modalInfo, hideModal, socketEmitPromises, channels,
@@ -122,7 +105,9 @@ const MessagesBox = ({ channelMessages }) => {
   );
 };
 
-const SendingForm = ({ newMessagePromise, t, profanityFilter }) => {
+const SendingForm = ({
+  newMessagePromise, t, currentChannel, username,
+}) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -138,7 +123,11 @@ const SendingForm = ({ newMessagePromise, t, profanityFilter }) => {
     const cleanedMessage = profanityFilter.clean(trimmedMessage);
     setSubmitting(true);
     try {
-      await newMessagePromise(cleanedMessage);
+      await newMessagePromise({
+        body: cleanedMessage,
+        channelId: currentChannel.id,
+        username,
+      });
       setMessage('');
     } catch (err) {
       console.error(err);
@@ -175,7 +164,7 @@ const SendingForm = ({ newMessagePromise, t, profanityFilter }) => {
 };
 
 const RightCol = ({
-  currentChannel, channelMessages, newMessagePromise, t, profanityFilter,
+  currentChannel, channelMessages, newMessagePromise, t, username,
 }) => (
   <Col className="p-0 h-100">
     <div className="d-flex flex-column h-100">
@@ -188,8 +177,9 @@ const RightCol = ({
       />
       <SendingForm
         newMessagePromise={newMessagePromise}
+        currentChannel={currentChannel}
         t={t}
-        profanityFilter={profanityFilter}
+        username={username}
       />
     </div>
   </Col>
@@ -199,9 +189,10 @@ const getAuthHeader = (userData) => (
   userData?.token ? { Authorization: `Bearer ${userData.token}` } : {}
 );
 
-const ChatPage = ({ profanityFilter }) => {
+const ChatPage = () => {
   const { t } = useTranslation();
   const auth = useAuth();
+  const socketApi = useSocketApi();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -230,57 +221,7 @@ const ChatPage = ({ profanityFilter }) => {
     };
     console.log('ChatPage fetching content...');
     fetchContent();
-
-    // socket.off(); // remove all listeners for all events ? No !
-    // socket.removeAllListeners(); // remove all listeners for all events ? Yes !
-    console.log(`Subscribe for socket events (socket.id=${socket.id})`);
-    socket
-      .on('connect', () => {
-        console.log(`socket "connect" id=${socket.id}`);
-      })
-      .on('connect_error', () => {
-        console.log('socket "connect_error"');
-      })
-      .on('disconnect', (reason) => {
-        console.log(`socket "disconnect" (${reason})`);
-      })
-
-      .on('newMessage', (payload) => {
-        console.log('newMessage "event"', payload);
-        dispatch(messagesActions.addMessage(payload));
-      })
-      .on('newChannel', (payload) => {
-        console.log('newChannel "event"', payload);
-        dispatch(channelsActions.addChannel(payload));
-        toast.info(t('Channel created'));
-      })
-      .on('removeChannel', (payload) => {
-        console.log('removeChannel "event"', payload);
-        dispatch(channelsActions.removeChannel(payload.id));
-        toast.info(t('Channel removed'));
-      })
-      .on('renameChannel', (payload) => {
-        console.log('renameChannel "event"', payload);
-        const { id, name } = payload;
-        dispatch(channelsActions.updateChannel({ id, changes: { name } }));
-        toast.info(t('Channel renamed'));
-      });
-
-    return () => {
-      socket.removeAllListeners(); // remove all listeners for all events ? Yes !
-      console.log(`Unsubscribe from socket events (socket.id=${socket.id})`);
-    };
   }, [auth.userData, dispatch, t, navigate]);
-
-  const socketEmitPromises = {
-    newMessage: (message) => getSocketEmitPromise(
-      'newMessage',
-      { body: message, channelId: currentChannelId, username: auth.userData.username },
-    ),
-    newChannel: (name) => getSocketEmitPromise('newChannel', { name }),
-    removeChannel: (id) => getSocketEmitPromise('removeChannel', { id }),
-    renameChannel: (id, name) => getSocketEmitPromise('renameChannel', { id, name }),
-  };
 
   const [modalInfo, setModalInfo] = useState({ type: null, item: null });
   const hideModal = () => setModalInfo({ type: null, item: null });
@@ -299,12 +240,12 @@ const ChatPage = ({ profanityFilter }) => {
           t={t}
           currentChannel={currentChannel}
           channelMessages={channelMessages}
-          newMessagePromise={socketEmitPromises.newMessage}
-          profanityFilter={profanityFilter}
+          newMessagePromise={socketApi.newMessage}
+          username={auth.userData.username}
         />
       </Row>
       {renderModal({
-        modalInfo, hideModal, socketEmitPromises, channels,
+        modalInfo, hideModal, socketEmitPromises: socketApi, channels,
       })}
     </Container>
   );

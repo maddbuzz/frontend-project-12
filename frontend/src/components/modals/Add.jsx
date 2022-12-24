@@ -33,7 +33,7 @@ const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
     validationSchema,
     onSubmit: async (values) => { // , { setSubmitting }) => {
       try {
-        const { data: channelWithId } = await newChannelPromise(values.channelName);
+        const { data: channelWithId } = await newChannelPromise({ name: values.channelName });
         dispatch(setCurrentChannelId(channelWithId.id));
         onHide();
       } catch (err) {

@@ -8,8 +8,8 @@ import {
   Navigate, Route, Routes,
 } from 'react-router-dom';
 
-import AuthContext from '../contexts/index.jsx';
-import useAuth from '../hooks/index.jsx';
+import { AuthContext } from '../contexts/index.jsx';
+import { useAuth } from '../hooks/index.jsx';
 import paths from '../paths.js';
 import ChatPage from './ChatPage.jsx';
 import LoginPage from './LoginPage.jsx';
@@ -49,7 +49,7 @@ const AuthButton = () => {
   return auth.userData && <Button onClick={auth.userLogOut}>{t('Logout')}</Button>;
 };
 
-const App = ({ profanityFilter }) => (
+const App = () => (
   <AuthProvider>
     <Router>
       <div className="d-flex flex-column vh-100">
@@ -68,7 +68,7 @@ const App = ({ profanityFilter }) => (
             path={paths.chatPagePath()}
             element={(
               <PrivateRoute>
-                <ChatPage profanityFilter={profanityFilter} />
+                <ChatPage />
               </PrivateRoute>
             )}
           />

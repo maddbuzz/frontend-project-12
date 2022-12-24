@@ -36,7 +36,7 @@ const Rename = ({
     validationSchema,
     onSubmit: async (values) => { // , { setSubmitting }) => {
       try {
-        await renameChannelPromise(channel.id, values.channelName);
+        await renameChannelPromise({ id: channel.id, name: values.channelName });
         onHide();
       } catch (err) {
         console.error(err);
