@@ -69,7 +69,7 @@ export default async () => {
       store.dispatch(channelsActions.updateChannel({ id, changes: { name } }));
       toast.info(i18n.t('Channel renamed'));
     });
-  // socket.removeAllListeners(); // remove all listeners for all events ? Yes !
+  // socket.removeAllListeners(); // remove all listeners for all events
 
   const getSocketEmitPromise = (...args) => new Promise((resolve, reject) => {
     socket.timeout(socketTimeoutMs).emit(...args, (err, response) => {
@@ -87,14 +87,15 @@ export default async () => {
   const russianDictionary = profanityFilter.getDictionary('ru');
   profanityFilter.add(russianDictionary);
 
-  /*
-  RollbarProvider instantiates Rollbar client instance handling any uncaught errors or unhandled
-  promises in the browser.
-  ErrorBoundary catches all React errors in the tree below and logs them to Rollbar.
-  */
   const rollbarConfig = {
-    accessToken: 'f7c9e7e2f6e24c289ccf9d39e612441d',
-    environment: 'production', // 'testenv',
+    accessToken: process.env.REACT_APP_ROLLBAR_TOKEN, // process.env.REACT_APP_NOT_SECRET_CODE
+    /*
+    "WARNING: Do not store any secrets (such as private API keys) in your React app!
+     Environment variables are embedded into the build,
+     meaning anyone can view them by inspecting your app's files."
+    https://create-react-app.dev/docs/adding-custom-environment-variables/
+    */
+    environment: 'production',
   };
 
   return (
