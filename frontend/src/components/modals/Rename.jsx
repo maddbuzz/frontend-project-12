@@ -1,6 +1,4 @@
-/* eslint-disable react/forbid-prop-types */
 import { useFormik } from 'formik';
-import _map from 'lodash/map.js';
 import React, { useEffect, useRef } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -9,13 +7,12 @@ import Stack from 'react-bootstrap/Stack';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 
-const validationSchema = Yup.object().shape({
+const getValidationSchema = (channelNames) => Yup.object().shape({
   channelName: Yup.string().trim()
     .min(3, 'From 3 to 20 characters')
     .max(20, 'From 3 to 20 characters')
     .required('Required field')
-    .notOneOf([Yup.ref('channelNames')], 'Must be unique'),
-  channelNames: Yup.array(),
+    .notOneOf(channelNames, 'Must be unique'),
 });
 
 const Rename = ({
@@ -31,9 +28,10 @@ const Rename = ({
     inputRef.current.select();
   }, []);
 
+  const channelNames = channels.map(({ name }) => name);
   const f = useFormik({
-    initialValues: { channelName: channel.name, channelNames: _map(channels, 'name') },
-    validationSchema,
+    initialValues: { channelName: channel.name },
+    validationSchema: getValidationSchema(channelNames),
     onSubmit: async (values) => { // , { setSubmitting }) => {
       try {
         await renameChannelPromise({ id: channel.id, name: values.channelName });

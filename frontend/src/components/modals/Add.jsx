@@ -1,6 +1,4 @@
-/* eslint-disable react/forbid-prop-types */
 import { useFormik } from 'formik';
-import _map from 'lodash/map.js';
 import React, { useEffect, useRef } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -12,13 +10,12 @@ import * as Yup from 'yup';
 
 import { setCurrentChannelId } from '../../slices/currentChannelIdSlice.js';
 
-const validationSchema = Yup.object().shape({
+const getValidationSchema = (channelNames) => Yup.object().shape({
   channelName: Yup.string().trim()
     .min(3, 'From 3 to 20 characters')
     .max(20, 'From 3 to 20 characters')
     .required('Required field')
-    .notOneOf([Yup.ref('channelNames')], 'Must be unique'),
-  channelNames: Yup.array(),
+    .notOneOf(channelNames, 'Must be unique'),
 });
 
 const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
@@ -28,9 +25,10 @@ const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
   });
   const dispatch = useDispatch();
 
+  const channelNames = channels.map(({ name }) => name);
   const f = useFormik({
-    initialValues: { channelName: '', channelNames: _map(channels, 'name') },
-    validationSchema,
+    initialValues: { channelName: '' },
+    validationSchema: getValidationSchema(channelNames),
     onSubmit: async (values) => { // , { setSubmitting }) => {
       try {
         const { data: channelWithId } = await newChannelPromise({ name: values.channelName });
