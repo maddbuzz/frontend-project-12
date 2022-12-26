@@ -14,7 +14,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
 import App from './components/App.jsx';
-import { SocketApiContext } from './contexts/index.jsx';
+import { ChatApiContext } from './contexts/index.jsx';
 import resources from './locales/index.js';
 import { actions as channelsActions } from './slices/channelsSlice.js';
 import reducer from './slices/index.js';
@@ -37,34 +37,34 @@ export default async () => {
 
   const socket = io();
 
-  console.log(`Subscribe for socket events (socket.id=${socket.id})`);
+  console.debug(`Subscribe for socket events (socket.id=${socket.id})`);
   socket
     .on('connect', () => {
-      console.log(`socket "connect" id=${socket.id}`);
+      console.debug(`socket "connect" id=${socket.id}`);
     })
     .on('connect_error', () => {
-      console.log('socket "connect_error"');
+      console.debug('socket "connect_error"');
     })
     .on('disconnect', (reason) => {
-      console.log(`socket "disconnect" (${reason})`);
+      console.debug(`socket "disconnect" (${reason})`);
     })
 
     .on('newMessage', (payload) => {
-      console.log('newMessage "event"', payload);
+      console.debug('newMessage "event"', payload);
       store.dispatch(messagesActions.addMessage(payload));
     })
     .on('newChannel', (payload) => {
-      console.log('newChannel "event"', payload);
+      console.debug('newChannel "event"', payload);
       store.dispatch(channelsActions.addChannel(payload));
       toast.info(i18n.t('Channel created'));
     })
     .on('removeChannel', (payload) => {
-      console.log('removeChannel "event"', payload);
+      console.debug('removeChannel "event"', payload);
       store.dispatch(channelsActions.removeChannel(payload.id));
       toast.info(i18n.t('Channel removed'));
     })
     .on('renameChannel', (payload) => {
-      console.log('renameChannel "event"', payload);
+      console.debug('renameChannel "event"', payload);
       const { id, name } = payload;
       store.dispatch(channelsActions.updateChannel({ id, changes: { name } }));
       toast.info(i18n.t('Channel renamed'));
@@ -77,7 +77,7 @@ export default async () => {
       resolve(response);
     });
   });
-  const socketApi = {
+  const chatApi = {
     newMessage: (...args) => getSocketEmitPromise('newMessage', ...args),
     newChannel: (...args) => getSocketEmitPromise('newChannel', ...args),
     removeChannel: (...args) => getSocketEmitPromise('removeChannel', ...args),
@@ -103,10 +103,10 @@ export default async () => {
       <RollbarProvider config={rollbarConfig}>
         <ErrorBoundary>
           <Provider store={store}>
-            <SocketApiContext.Provider value={socketApi}>
+            <ChatApiContext.Provider value={chatApi}>
               <App />
-              <ToastContainer pauseOnFocusLoss={false} />
-            </SocketApiContext.Provider>
+              <ToastContainer pauseOnFocusLoss={false} position="top-center" />
+            </ChatApiContext.Provider>
           </Provider>
         </ErrorBoundary>
       </RollbarProvider>

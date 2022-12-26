@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import * as Yup from 'yup';
 
+import { useChatApi } from '../../hooks/index.jsx';
 import { setCurrentChannelId } from '../../slices/currentChannelIdSlice.js';
 
 const getValidationSchema = (channelNames) => Yup.object().shape({
@@ -18,20 +19,22 @@ const getValidationSchema = (channelNames) => Yup.object().shape({
     .notOneOf(channelNames, 'Must be unique'),
 });
 
-const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
+const Add = ({ onHide, channels }) => {
+  const chatApi = useChatApi();
+  const dispatch = useDispatch();
+
   const inputRef = useRef();
   useEffect(() => {
     inputRef.current.focus();
   });
-  const dispatch = useDispatch();
 
   const channelNames = channels.map(({ name }) => name);
-  const f = useFormik({
+  const formik = useFormik({
     initialValues: { channelName: '' },
     validationSchema: getValidationSchema(channelNames),
     onSubmit: async (values) => { // , { setSubmitting }) => {
       try {
-        const { data: channelWithId } = await newChannelPromise({ name: values.channelName });
+        const { data: channelWithId } = await chatApi.newChannel({ name: values.channelName });
         dispatch(setCurrentChannelId(channelWithId.id));
         onHide();
       } catch (err) {
@@ -51,22 +54,22 @@ const Add = ({ socketEmitPromise: newChannelPromise, onHide, channels }) => {
       </Modal.Header>
 
       <Modal.Body>
-        <Form onSubmit={f.handleSubmit}>
-          <fieldset disabled={f.isSubmitting}>
+        <Form onSubmit={formik.handleSubmit}>
+          <fieldset disabled={formik.isSubmitting}>
             <Stack gap={2}>
               <Form.Group controlId="formChannelName" className="position-relative">
                 <Form.Label visuallyHidden>{t('Channel name')}</Form.Label>
                 <Form.Control
                   ref={inputRef}
-                  onChange={f.handleChange}
+                  onChange={formik.handleChange}
                   // onBlur={f.handleBlur}
-                  value={f.values.channelName}
+                  value={formik.values.channelName}
                   data-testid="input-channelName"
                   name="channelName"
-                  isInvalid={f.touched.channelName && f.errors.channelName}
+                  isInvalid={formik.touched.channelName && formik.errors.channelName}
                 />
                 <Form.Control.Feedback type="invalid" tooltip className="position-absolute">
-                  {t(f.errors.channelName)}
+                  {t(formik.errors.channelName)}
                 </Form.Control.Feedback>
               </Form.Group>
               <div className="d-flex justify-content-end">

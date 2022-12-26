@@ -10,29 +10,22 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Row from 'react-bootstrap/Row';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { animateScroll } from 'react-scroll';
 import { toast } from 'react-toastify';
 
-import { useAuth, useSocketApi } from '../hooks/index.jsx';
+import { useAuth, useChatApi } from '../hooks/index.jsx';
 import paths from '../paths.js';
 import { actions as channelsActions, selectors as channelsSelectors } from '../slices/channelsSlice.js';
 import { setCurrentChannelId } from '../slices/currentChannelIdSlice.js';
 import { actions as messagesActions, selectors as messagesSelectors } from '../slices/messagesSlice.js';
 import getModal from './modals/index.js';
 
-const renderModal = ({
-  modalInfo, hideModal, socketEmitPromises, channels,
-}) => {
-  if (!modalInfo.type) {
-    return null;
-  }
-  const Component = getModal(modalInfo.type);
-  const socketEmitPromise = socketEmitPromises[modalInfo.type];
+const renderModal = ({ modalInfo, hideModal, channels }) => {
+  if (!modalInfo.type) return null;
+  const ModalComponent = getModal(modalInfo.type);
   return (
-    <Component
+    <ModalComponent
       modalInfo={modalInfo}
-      socketEmitPromise={socketEmitPromise}
       onHide={hideModal}
       channels={channels}
     />
@@ -53,28 +46,28 @@ const LeftCol = ({
         </button>
       </div>
       <ul className="nav flex-column nav-pills nav-fill px-2">
-        {channels.map((c) => (
-          <li className="nav-item w-100" key={c.id}>
+        {channels.map((channel) => (
+          <li className="nav-item w-100" key={channel.id}>
             <Dropdown as={ButtonGroup} className="d-flex">
               <Button
                 className="w-100 rounded-0 text-start text-truncate"
-                variant={c.id === currentChannelId && 'secondary'}
-                onClick={() => { dispatch(setCurrentChannelId(c.id)); }}
+                variant={channel.id === currentChannelId && 'secondary'}
+                onClick={() => { dispatch(setCurrentChannelId(channel.id)); }}
               >
                 <span className="me-1">#</span>
-                {c.name}
+                {channel.name}
               </Button>
-              {c.removable && (
+              {channel.removable && (
                 <Dropdown.Toggle
                   split
-                  variant={c.id === currentChannelId && 'secondary'}
+                  variant={channel.id === currentChannelId && 'secondary'}
                 >
                   <span className="visually-hidden">{t('Channel management')}</span>
                 </Dropdown.Toggle>
               )}
               <Dropdown.Menu>
-                <Dropdown.Item onClick={() => showModal('removeChannel', c)}>{t('Delete')}</Dropdown.Item>
-                <Dropdown.Item onClick={() => showModal('renameChannel', c)}>{t('Rename')}</Dropdown.Item>
+                <Dropdown.Item onClick={() => showModal('removeChannel', channel)}>{t('Delete')}</Dropdown.Item>
+                <Dropdown.Item onClick={() => showModal('renameChannel', channel)}>{t('Rename')}</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </li>
@@ -84,13 +77,13 @@ const LeftCol = ({
   );
 };
 
-const MessagesBox = ({ channelMessages }) => {
+const MessagesBox = ({ currentChannelMessages }) => {
   useEffect(() => {
     animateScroll.scrollToBottom({ containerId: 'messages-box', delay: 0, duration: 0 });
-  }, [channelMessages.length]);
+  }, [currentChannelMessages.length]);
   return (
     <div id="messages-box" className="overflow-auto px-5 ">
-      {channelMessages.map(({ id, body, username }) => (
+      {currentChannelMessages.map(({ id, body, username }) => (
         <div key={id} className="text-break mb-2">
           <b>{username}</b>
           {`: ${body}`}
@@ -100,9 +93,8 @@ const MessagesBox = ({ channelMessages }) => {
   );
 };
 
-const SendingForm = ({
-  newMessagePromise, t, currentChannel, username,
-}) => {
+const SendingForm = ({ t, currentChannel, username }) => {
+  const chatApi = useChatApi();
   const [isSubmitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -118,7 +110,7 @@ const SendingForm = ({
     const cleanedMessage = profanityFilter.clean(trimmedMessage);
     setSubmitting(true);
     try {
-      await newMessagePromise({
+      await chatApi.newMessage({
         body: cleanedMessage,
         channelId: currentChannel.id,
         username,
@@ -157,21 +149,20 @@ const SendingForm = ({
 };
 
 const RightCol = ({
-  currentChannel, channelMessages, newMessagePromise, t, username,
+  currentChannel, currentChannelMessages, t, username,
 }) => (
   <Col className="p-0 h-100">
     <div className="d-flex flex-column h-100">
       <div className="bg-light mb-4 p-3 shadow-sm small">
         <p className="m-0"><b>{`# ${currentChannel?.name}`}</b></p>
-        <span className="text-muted">{t('messagesCount', { count: channelMessages.length })}</span>
+        <span className="text-muted">{t('messagesCount', { count: currentChannelMessages.length })}</span>
       </div>
       <MessagesBox
-        channelMessages={channelMessages}
+        currentChannelMessages={currentChannelMessages}
       />
       <SendingForm
-        newMessagePromise={newMessagePromise}
-        currentChannel={currentChannel}
         t={t}
+        currentChannel={currentChannel}
         username={username}
       />
     </div>
@@ -185,17 +176,14 @@ const getAuthHeader = (userData) => (
 const ChatPage = () => {
   const { t } = useTranslation();
   const auth = useAuth();
-  const socketApi = useSocketApi();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
+  const channels = useSelector(channelsSelectors.selectAll);
   const currentChannelId = useSelector((state) => state.currentChannelId.value);
   const currentChannel = useSelector(
     (state) => channelsSelectors.selectById(state, currentChannelId),
   );
-
-  const channels = useSelector(channelsSelectors.selectAll);
-  const channelMessages = useSelector(messagesSelectors.selectAll)
+  const currentChannelMessages = useSelector(messagesSelectors.selectAll)
     .filter(({ channelId }) => channelId === currentChannelId);
 
   useEffect(() => {
@@ -208,13 +196,13 @@ const ChatPage = () => {
       } catch (err) {
         if (!err.isAxiosError) throw err;
         console.error(err);
-        if (err.response?.status === 401) navigate(paths.loginPagePath());
+        if (err.response?.status === 401) auth.userLogOut();
         else toast.error(t('Connection error'));
       }
     };
-    console.log('ChatPage fetching content...');
+    console.debug('ChatPage fetching content...');
     fetchContent();
-  }, [auth.userData, dispatch, t, navigate]);
+  }, [auth, dispatch, t]);
 
   const [modalInfo, setModalInfo] = useState({ type: null, item: null });
   const hideModal = () => setModalInfo({ type: null, item: null });
@@ -232,14 +220,11 @@ const ChatPage = () => {
         <RightCol
           t={t}
           currentChannel={currentChannel}
-          channelMessages={channelMessages}
-          newMessagePromise={socketApi.newMessage}
+          currentChannelMessages={currentChannelMessages}
           username={auth.userData.username}
         />
       </Row>
-      {renderModal({
-        modalInfo, hideModal, socketEmitPromises: socketApi, channels,
-      })}
+      {renderModal({ modalInfo, hideModal, channels })}
     </Container>
   );
 };

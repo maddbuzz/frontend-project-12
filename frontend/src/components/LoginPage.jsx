@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { withFormik } from 'formik';
+import { useFormik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
@@ -45,72 +45,6 @@ const FormContainer = ({ children, t }) => (
   </Container>
 );
 
-const MyForm = (props) => {
-  const {
-    values,
-    touched,
-    errors,
-    handleChange,
-    handleBlur,
-    handleSubmit,
-    isSubmitting,
-    authFailed,
-    t,
-  } = props;
-  const inputRef = useRef();
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  return (
-    <Form onSubmit={handleSubmit}>
-      <h1 className="text-center mb-4">{t('Login')}</h1>
-      <fieldset disabled={isSubmitting}>
-        <Stack gap={4}>
-          <FloatingLabel controlId="floatingUsername" label={t('Your nickname')} className="position-relative">
-            <Form.Control
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.username}
-              placeholder={t('Your nickname')}
-              name="username"
-              autoComplete="username"
-              isInvalid={authFailed || (touched.username && errors.username)}
-              ref={inputRef}
-            />
-            {authFailed && (
-              <Form.Control.Feedback type="invalid" tooltip className="position-absolute top-0 start-100">
-                {t('Invalid username or password')}
-              </Form.Control.Feedback>
-            )}
-            {errors.username && (
-              <Form.Control.Feedback type="invalid" tooltip>
-                {t(errors.username)}
-              </Form.Control.Feedback>
-            )}
-          </FloatingLabel>
-          <FloatingLabel controlId="floatingPassword" label={t('Password')}>
-            <Form.Control
-              type="password"
-              onChange={handleChange}
-              onBlur={handleBlur}
-              value={values.password}
-              placeholder={t('Password')}
-              name="password"
-              autoComplete="current-password"
-              isInvalid={touched.password && errors.password}
-            />
-            <Form.Control.Feedback type="invalid" tooltip>
-              {t(errors.password)}
-            </Form.Control.Feedback>
-          </FloatingLabel>
-          <Button type="submit" variant="outline-primary">{t('Login')}</Button>
-        </Stack>
-      </fieldset>
-    </Form>
-  );
-};
-
 const validationSchema = Yup.object().shape({
   username: Yup.string().trim()
     .min(3, 'From 3 to 20 characters')
@@ -145,18 +79,67 @@ const LoginPage = () => {
   const { t } = useTranslation();
   const [authFailed, setAuthFailed] = useState(false);
 
-  const MyEnhancedForm = withFormik({
-    mapPropsToValues: () => ({
+  const inputRef = useRef();
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const formik = useFormik({
+    initialValues: {
       username: '',
       password: '',
-    }),
+    },
     validationSchema,
-    handleSubmit: useSubmit(setAuthFailed, t),
-  })(MyForm);
+    onSubmit: useSubmit(setAuthFailed, t),
+  });
 
   return (
     <FormContainer t={t}>
-      <MyEnhancedForm authFailed={authFailed} t={t} />
+      <Form onSubmit={formik.handleSubmit}>
+        <h1 className="text-center mb-4">{t('Login')}</h1>
+        <fieldset disabled={formik.isSubmitting}>
+          <Stack gap={4}>
+            <FloatingLabel controlId="floatingUsername" label={t('Your nickname')} className="position-relative">
+              <Form.Control
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.username}
+                placeholder={t('Your nickname')}
+                name="username"
+                autoComplete="username"
+                isInvalid={authFailed || (formik.touched.username && formik.errors.username)}
+                ref={inputRef}
+              />
+              {authFailed && (
+                <Form.Control.Feedback type="invalid" tooltip className="position-absolute top-0 start-100">
+                  {t('Invalid username or password')}
+                </Form.Control.Feedback>
+              )}
+              {formik.errors.username && (
+                <Form.Control.Feedback type="invalid" tooltip>
+                  {t(formik.errors.username)}
+                </Form.Control.Feedback>
+              )}
+            </FloatingLabel>
+            <FloatingLabel controlId="floatingPassword" label={t('Password')}>
+              <Form.Control
+                type="password"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.password}
+                placeholder={t('Password')}
+                name="password"
+                autoComplete="current-password"
+                isInvalid={formik.touched.password && formik.errors.password}
+              />
+              <Form.Control.Feedback type="invalid" tooltip>
+                {t(formik.errors.password)}
+              </Form.Control.Feedback>
+            </FloatingLabel>
+            <Button type="submit" variant="outline-primary">{t('Login')}</Button>
+          </Stack>
+        </fieldset>
+      </Form>
     </FormContainer>
   );
 };

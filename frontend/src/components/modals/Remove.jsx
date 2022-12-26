@@ -4,18 +4,17 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import { useTranslation } from 'react-i18next';
 
-const Remove = ({
-  modalInfo: { item: channel },
-  socketEmitPromise: removeChannelPromise,
-  onHide,
-}) => {
+import { useChatApi } from '../../hooks/index.jsx';
+
+const Remove = ({ modalInfo: { item: channel }, onHide }) => {
+  const chatApi = useChatApi();
   const [isSubmitting, setSubmitting] = useState(false);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await removeChannelPromise({ id: channel.id });
+      await chatApi.removeChannel({ id: channel.id });
       onHide();
     } catch (err) {
       console.error(err);
