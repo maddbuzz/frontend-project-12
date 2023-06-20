@@ -2,7 +2,7 @@
 
 # Chat *(graduation project of the profession «Frontend Developer»)*
 
-Chat is a very simplistic alternative to Slack chat - a real-time React/Redux application using AJAX, REST, websockets, React Hooks + Redux Toolkit + Formik
+**Chat** is a very simplistic alternative to Slack chat - a real-time React/Redux application using AJAX, REST, websockets, React Hooks + Redux Toolkit + Formik
 
 ## Deployment commands (deployed on [render](https://maddbuzz-chat-project.onrender.com/))
 
