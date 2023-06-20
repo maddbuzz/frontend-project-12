@@ -1,6 +1,6 @@
 [![Actions Status](https://github.com/maddbuzz/frontend-project-12/workflows/hexlet-check/badge.svg)](https://github.com/maddbuzz/frontend-project-12/actions)
 
-# Chat
+# Chat *(graduation project of the profession «Frontend Developer»)*
 
 Chat is a very simplistic alternative to Slack chat - a real-time React/Redux application using AJAX, REST, websockets, React Hooks + Redux Toolkit + Formik
 
